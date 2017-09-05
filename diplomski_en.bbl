@@ -1,0 +1,153 @@
+\begin{thebibliography}{21}
+\providecommand{\natexlab}[1]{#1}
+\providecommand{\url}[1]{\texttt{#1}}
+\expandafter\ifx\csname urlstyle\endcsname\relax
+  \providecommand{\doi}[1]{doi: #1}\else
+  \providecommand{\doi}{doi: \begingroup \urlstyle{rm}\Url}\fi
+
+\bibitem[Baillieul(1985)]{baillieul1985kinematic}
+John Baillieul.
+\newblock Kinematic programming alternatives for redundant manipulators.
+\newblock In \emph{Robotics and Automation. Proceedings. 1985 IEEE
+  International Conference on}, volume~2, pages 722--728. IEEE, 1985.
+
+\bibitem[Bloch et~al.(2003)Bloch, Baillieul, Crouch, Marsden, Zenkov,
+  Krishnaprasad, and Murray]{bloch2003nonholonomic}
+Anthony Bloch, John Baillieul, Peter Crouch, Jerrold~E Marsden, Dmitry Zenkov,
+  Perinkulam~Sambamurthy Krishnaprasad, and Richard~M Murray.
+\newblock \emph{Nonholonomic mechanics and control}, volume~24.
+\newblock Springer, 2003.
+
+\bibitem[Buss and Kim(2005)]{buss2005selectively}
+Samuel~R Buss and Jin-Su Kim.
+\newblock Selectively damped least squares for inverse kinematics.
+\newblock \emph{Journal of Graphics tools}, 10\penalty0 (3):\penalty0 37--49,
+  2005.
+
+\bibitem[Chan and Lawrence(1988)]{chan1988general}
+Stephen~K Chan and Peter~D Lawrence.
+\newblock General inverse kinematics with the error damped pseudoinverse.
+\newblock In \emph{Robotics and Automation, 1988. Proceedings., 1988 IEEE
+  International Conference on}, pages 834--839. IEEE, 1988.
+
+\bibitem[Chiaverini(1997)]{chiaverini1997singularity}
+Stefano Chiaverini.
+\newblock Singularity-robust task-priority redundancy resolution for real-time
+  kinematic control of robot manipulators.
+\newblock \emph{IEEE Transactions on Robotics and Automation}, 13\penalty0
+  (3):\penalty0 398--410, 1997.
+
+\bibitem[Chiaverini et~al.(1994)Chiaverini, Siciliano, and
+  Egeland]{chiaverini1994review}
+Stefano Chiaverini, Bruno Siciliano, and Olav Egeland.
+\newblock Review of the damped least-squares inverse kinematics with
+  experiments on an industrial robot manipulator.
+\newblock \emph{IEEE Transactions on control systems technology}, 2\penalty0
+  (2):\penalty0 123--134, 1994.
+
+\bibitem[Colom{\'e} and Torras(2012)]{colome2012redundant}
+Adria Colom{\'e} and Carme Torras.
+\newblock Redundant inverse kinematics: Experimental comparative review and two
+  enhancements.
+\newblock In \emph{Intelligent Robots and Systems (IROS), 2012 IEEE/RSJ
+  International Conference on}, pages 5333--5340. IEEE, 2012.
+
+\bibitem[Colom{\'e} and Torras(2015)]{colome2015closed}
+Adria Colom{\'e} and Carme Torras.
+\newblock Closed-loop inverse kinematics for redundant robots: Comparative
+  assessment and two enhancements.
+\newblock \emph{IEEE/ASME Transactions on Mechatronics}, 20\penalty0
+  (2):\penalty0 944--955, 2015.
+
+\bibitem[Korayem and Ghariblu(2004)]{korayem2004analysis}
+Moharam~Habibnejad Korayem and H~Ghariblu.
+\newblock Analysis of wheeled mobile flexible manipulator dynamic motions with
+  maximum load carrying capacities.
+\newblock \emph{Robotics and Autonomous Systems}, 48\penalty0 (2):\penalty0
+  63--76, 2004.
+
+\bibitem[Korayem et~al.(2012)Korayem, Rahimi, and
+  Nikoobin]{korayem2012mathematical}
+Moharam~Habibnejad Korayem, HN~Rahimi, and A~Nikoobin.
+\newblock Mathematical modeling and trajectory planning of mobile manipulators
+  with flexible links and joints.
+\newblock \emph{Applied Mathematical Modelling}, 36\penalty0 (7):\penalty0
+  3229--3244, 2012.
+
+\bibitem[Leshin et~al.(2013)Leshin, Mahaffy, Webster, Cabane, Coll, Conrad,
+  Archer, Atreya, Brunner, Buch, et~al.]{leshin2013volatile}
+LA~Leshin, PR~Mahaffy, CR~Webster, Michel Cabane, Patrice Coll, PG~Conrad,
+  PD~Archer, SK~Atreya, AE~Brunner, A~Buch, et~al.
+\newblock Volatile, isotope, and organic analysis of martian fines with the
+  mars curiosity rover.
+\newblock \emph{Science}, 341\penalty0 (6153):\penalty0 1238937, 2013.
+
+\bibitem[Moe et~al.(2016)Moe, Antonelli, Teel, Pettersen, and
+  Schrimpf]{moe2016set}
+Signe Moe, Gianluca Antonelli, Andrew~R Teel, Kristin~Y Pettersen, and Johannes
+  Schrimpf.
+\newblock Set-based tasks within the singularity-robust multiple task-priority
+  inverse kinematics framework: General formulation, stability analysis, and
+  experimental results.
+\newblock \emph{Frontiers in Robotics and AI}, 3:\penalty0 16, 2016.
+
+\bibitem[Moore and Stouch(2014)]{MooreStouchKeneralizedEkf2014}
+T.~Moore and D.~Stouch.
+\newblock A generalized extended kalman filter implementation for the robot
+  operating system.
+\newblock In \emph{Proceedings of the 13th International Conference on
+  Intelligent Autonomous Systems (IAS-13)}. Springer, July 2014.
+
+\bibitem[Nakamura(1990)]{nakamura1990advanced}
+Yoshihiko Nakamura.
+\newblock \emph{Advanced robotics: redundancy and optimization}.
+\newblock Addison-Wesley Longman Publishing Co., Inc., 1990.
+
+\bibitem[Nakamura et~al.(1987)Nakamura, Hanafusa, and
+  Yoshikawa]{nakamura1987task}
+Yoshihiko Nakamura, Hideo Hanafusa, and Tsuneo Yoshikawa.
+\newblock Task-priority based redundancy control of robot manipulators.
+\newblock \emph{The International Journal of Robotics Research}, 6\penalty0
+  (2):\penalty0 3--15, 1987.
+
+\bibitem[Papadopoulos and Gonthier(1999)]{papadopoulos1999framework}
+Evangelos Papadopoulos and Yves Gonthier.
+\newblock A framework for large-force task planning of mobile and redundant
+  manipulators.
+\newblock \emph{Journal of Robotic Systems}, 16\penalty0 (3):\penalty0
+  151--162, 1999.
+
+\bibitem[Schulman et~al.(2013)Schulman, Ho, Lee, Awwal, Bradlow, and
+  Abbeel]{schulman2013finding}
+John Schulman, Jonathan Ho, Alex~X Lee, Ibrahim Awwal, Henry Bradlow, and
+  Pieter Abbeel.
+\newblock Finding locally optimal, collision-free trajectories with sequential
+  convex optimization.
+\newblock In \emph{Robotics: science and systems}, volume~9, pages 1--10, 2013.
+
+\bibitem[Slotine(1991)]{slotine1991general}
+Siciliano~B Slotine.
+\newblock A general framework for managing multiple tasks in highly redundant
+  robotic systems.
+\newblock In \emph{proceeding of 5th International Conference on Advanced
+  Robotics}, volume~2, pages 1211--1216, 1991.
+
+\bibitem[Thrun et~al.(2005)Thrun, Burgard, and Fox]{thrun2005probabilistic}
+Sebastian Thrun, Wolfram Burgard, and Dieter Fox.
+\newblock Probabilistic robotics. 2005.
+\newblock \emph{CURRICULUM VITAE}, 2005.
+
+\bibitem[Xu et~al.(2010)Xu, Wang, and Sun]{xu2010two}
+Jianxin Xu, Wei Wang, and Yuanguang Sun.
+\newblock Two optimization algorithms for solving robotics inverse kinematics
+  with redundancy.
+\newblock \emph{Journal of Control Theory and Applications}, 8\penalty0
+  (2):\penalty0 166--175, 2010.
+
+\bibitem[Yamamoto and Yun(1992)]{yamamoto1992coordinating}
+Yoshio Yamamoto and Xiaoping Yun.
+\newblock Coordinating locomotion and manipulation of a mobile manipulator.
+\newblock In \emph{Decision and Control, 1992., Proceedings of the 31st IEEE
+  Conference on}, pages 2643--2648. IEEE, 1992.
+
+\end{thebibliography}

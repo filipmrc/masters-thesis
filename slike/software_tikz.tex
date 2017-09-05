@@ -1,0 +1,183 @@
+% EPC flow charts
+% Author: Fabian Schuh
+\documentclass[tikz]{standalone}
+
+
+
+
+\begin{document}
+\tikzset{
+    state/.style={
+           rectangle,
+           rounded corners,
+           draw=black, very thick,
+           fill=white,
+           minimum height=2em,
+           inner sep=1.5pt,
+           text centered,
+           },
+}
+
+\tikzset{
+    state_code/.style={
+           rectangle,
+           draw=black, thin,
+           rounded corners,
+           fill = white,
+           pattern=crosshatch dots,
+           minimum height=2em,
+           inner sep=2pt,
+           text centered
+           },
+}
+\begin{tikzpicture}
+  % RECTANGLE SOLVERS
+
+ \node[state_code,text width=4cm] (THING CONTROL) 
+ {
+  \textbf{thing control.cc}\\
+   Command relay\\
+   Data acquistion\\
+   Motion planning\\
+   Safety
+};
+ 
+ % STATE TASK PRIORITY
+ \node[state_code,
+  left of = THING CONTROL,
+  node distance = 4.5cm,
+  anchor=center,
+  text width=4cm] (TASK PRIORITY) 
+ {%
+  \textbf{\centering task priority solver.h}\\
+ };
+ 
+ % STATE CERES
+  \node[state_code,
+  above of = TASK PRIORITY,
+  node distance = 1cm,
+  anchor=center,
+  text width=3cm] (CERES) 
+ {%
+  \textbf{\centering  ceres solver.cc}\\
+ };
+ 
+  % STATE THING KINEMATICS
+ \node[state_code,
+  right of = THING CONTROL,
+  node distance = 4.5cm,
+  anchor=center,
+  text width=4cm] (THING KINEMATICS) 
+ {%
+  \textbf{thing kinematics.cc}\\
+   Forward kinematics\\
+   Utility functions\\
+   Conversions
+
+ };
+ 
+  % STATE ROS CONTROL
+ \node[state,
+  below of=THING CONTROL,
+  node distance = 5cm,
+  anchor=center,
+  text width=4cm] (ROS CONTROL) 
+ {%
+ \begin{tabular}{c}
+  \textbf{ros control}\\
+  \parbox{4cm}{\centering Interpolate trajectory}
+ \end{tabular}
+ };
+ 
+  % STATE RB
+  \node[state,
+  below of=ROS CONTROL,
+  yshift=-1.5cm,
+  xshift = -1.5cm,
+  anchor=center,
+  text width=3cm] (RIDGEBACK API) 
+ {%
+ \begin{tabular}{c}
+  \textbf{ridgeback node}\\
+  \parbox{2cm}{\centering Execute}
+ \end{tabular}
+ };
+ 
+ % STATE UR10
+  \node[state,
+  below of=ROS CONTROL,
+  yshift=-1.5cm,
+  xshift = 1.5cm,
+  anchor=center,
+  text width=2.5cm] (UR10 API) 
+ {%
+ \begin{tabular}{c}
+  \textbf{ur10 node}\\
+  \parbox{2cm}{  \centering Execute}
+ \end{tabular}
+ };
+
+ 
+  % STATE RSTATE
+ \node[state,
+  right of=ROS CONTROL,
+  yshift=0cm,
+  xshift = 4.3cm,
+  anchor=center,
+  text width=4.2cm] (RSP) 
+ {%
+ \begin{tabular}{c}
+  \textbf{robot state publisher}\\
+  \parbox{4cm}{  \centering Publish tf transforms}
+ \end{tabular}
+ };
+ 
+  % STATE RLOC
+ \node[state,
+  below of=RSP,
+  yshift=-1.5cm,
+  xshift = 0cm,
+  anchor=center,
+  text width=3.4cm] (RLOC) 
+ {%
+ \begin{tabular}{c}
+  \textbf{robot localization}\\
+  \parbox{2cm}{  \centering EKF}
+ \end{tabular}
+ };
+ 
+   % STATE TASK
+ \node[state,
+  above of=THING CONTROL,
+  node distance = 3.5cm,
+  anchor=center,
+  text width=3cm] (TASK) 
+ {%
+  \textbf{task}\\
+  User task
+ };
+ 
+\node (rect thing control) at ($(THING CONTROL.south)+(0,-0.9)$) [draw,thick,minimum width=0.1cm,minimum height=0.1cm] {};
+\node (rect ros control) at ($(ROS CONTROL.north)+(0,0.6)$) [draw,thick,minimum width=0.1cm,minimum height=0.1cm] {};
+\node (rect hardware) at ($(RIDGEBACK API.north)+(1.5,0.4)$) [draw,thick,minimum width=0.1cm,minimum height=0.1cm] {};
+\node (rect hardware right) at ($(UR10 API.east)+(0.3,0)$) [draw,thick,minimum width=0.1cm,minimum height=0.1cm] {};
+\node (rect thing control above) at ($(THING CONTROL.north)+(0,0.75)$) [] {};
+
+\begin{scope}[on background layer]
+\draw[black,very thick,rounded corners, fill = white] ($(CERES.north west)+(-1,1.1)$)  rectangle ($(THING KINEMATICS.south east)+(0.3,-0.9)$);
+\draw[black,thick] ($(ROS CONTROL.north west)+(-1.6,0.6)$)  rectangle ($(UR10 API.south east)+(5,-1)$);
+\end{scope}
+\draw[black,thick] ($(RIDGEBACK API.north west)+(-0.3,0.4)$)  rectangle ($(UR10 API.south east)+(0.3,-0.4)$);
+\draw[black,thick] ($(TASK.north west)+(-6,0.4)$)  rectangle ($(THING KINEMATICS.south east)+(1,-1.3)$);
+
+
+\node (thing control text) at ($(THING CONTROL.north)+(0,0.4)$) [] {\textbf{thing control}};
+
+\path (rect thing control) 	edge  node[anchor=south,above]{} (rect ros control);
+\path (rect thing control above) 	edge  node[anchor=south,above]{} (TASK);
+\path (ROS CONTROL) 	edge  node[anchor=south,left]{} (rect hardware);
+\path (rect hardware right) 	edge  node[anchor=south,left]{} (RLOC);
+\path (ROS CONTROL) 	edge  node[anchor=south,left]{} (RSP);
+\path (RLOC) 	edge  node[anchor=south,left]{} (RSP);
+\end{tikzpicture}
+\end{document}

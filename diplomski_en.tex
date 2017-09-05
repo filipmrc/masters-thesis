@@ -1,0 +1,1014 @@
+\documentclass[times, utf8, diplomski, english]{fer}
+\usepackage{booktabs}
+\usepackage{algpseudocode}
+\usepackage{algorithm}
+\usepackage{subcaption}
+\usepackage[mode=buildnew]{standalone}% requires -shell-escape
+\usepackage{pgf}
+\usepackage{tikz}
+\usetikzlibrary{arrows,automata}
+\usetikzlibrary{positioning}
+\usetikzlibrary{calc}
+\usetikzlibrary{patterns}
+\usetikzlibrary{backgrounds}
+\graphicspath{{./slike/}}
+
+\begin{document}
+
+% TODO: Navedite broj rada.
+\thesisnumber{000}
+
+% TODO: Navedite naslov rada.
+\title{From Global to Local: Maintaining Accurate Mobile Manipulator State Estimates Over Long Trajectories}
+
+% TODO: Navedite svoje ime i prezime.
+\author{Filip Maric}
+
+\maketitle
+
+% Ispis stranice s napomenom o umetanju izvornika rada. Uklonite naredbu \izvornik ako želite izbaciti tu stranicu.
+\izvornik
+
+% Dodavanje zahvale ili prazne stranice. Ako ne želite dodati zahvalu, naredbu ostavite radi prazne stranice.
+\zahvala{dsadsa}
+
+\tableofcontents
+
+\chapter{Introduction}
+In applications ranging from military operations to extraterrestrial exploration, mobile manipulators present themselves as the ideal answer to many challenges being addressed by robots.
+The mobile platform increases the workspace of a conventional manipulator while also enabling optimal positioning.
+The increased workspace also provides the capability of performing industrial tasks that would otherwise require multiple manipulators.
+A comprehensive survey on mobile manipulator systems can be found in \citep{bloch2003nonholonomic}.
+
+The mobile manipulator can be described as a robotic system composed of a manipulator arm mounted on top of a mobile platform.
+A variety of issues related to mobile manipulators have been explored in the past two decades. 
+These include dynamic and static stability, force development and application, maximum payload determination, etc \citep{papadopoulos1999framework,korayem2004analysis}.
+However, a majority of the research concerning mobile manipulators deals with motion planning and state estimation \citep{yamamoto1992coordinating,korayem2012mathematical}.
+ 
+%While these types of robots have been studied and used in space exploration \citep{leshin2013volatile}, they have only recently been introduced for commercial robotics applications.
+%This makes the above mentioned challenges an important area of research as there 
+
+This thesis explores the problems of state estimation and motion planning in the context of an omni-directional mobile manipulator.
+Chapter \ref{chapter:thing} introduces the "Thing" mobile manipulator used in this work.
+Each major component is described in appropriate detail, keeping in mind the context of research presented.
+
+Chapter \ref{chapter:State estimation} deals with the challenge of state estimation for a mobile manipulator.
+Assuming accurate mobile base pose data, it is possible to estimate the state of the manipulator to a reasonable degree of accuracy using only a forward kinematics model described in section \ref{section:Kinematics}.
+The primary interest thus lies in obtaining the end effector pose estimate, as other estimates can be derived from it if necessary.
+Finding the base position relative to the starting position is explored in section \ref{section:Localization} by fusing local odometry estimates in a probabilistic framework.
+
+Finally, two approaches two motion planning are described in chapter \ref{chapter:motion planning}.
+A classical approach enables defining priorities for kinematics tasks assigned to the robot, which are then applied in a classical optimization scheme.
+The more contemporary \textit{sequential convex optimization} is also explored, which enables defining non-linear inequality and equality constraints. 
+These two approaches offer a powerful framework for integrating various tasks.
+
+\chapter{Thing mobile manipulator}\label{chapter:thing}
+The Thing mobile manipulator is composed of a Ridgeback omni-directional platform and a UR10 manipulator arm equipped with a Robotiq 3-Finger Adaptive Robot Gripper is used as the end-effector.
+The three systems are essentially separate on the lower level: the RIdgeback, UR10 and Robotiq gripper local hardware interfaces are electronically independent self-contained systems.
+These local interfaces are unified on a higher level by the Ridgeback's computer operating as a server running the Robot Operating System (ROS).
+\begin{figure}[h]
+\label{figure:thing}
+\centering
+\includegraphics[scale=0.045]{thing_segmented_trans}
+\caption{The Ridgeback mobile platform}
+\end{figure}
+This platform is also equipped with a vast array of sensors (some not shown in \ref{figure:thing}), making it ideal for autonomy research in robotics. 
+The Ridgeback platform is outfitted with a Hokuyo laser range finder (LIDAR) and Kinect2 camera , giving valuable perception capabilities.
+The omni-directional drive enables field-of-view (FOV) control independent of both end-effector pose and base position, making it an interesting plaform for active perception research.
+The UR10 manipulatoris equipped with the advanced FT300 force-torque sensor and an Intel Realsense camera mounted on the gripper.
+\section{Ridgeback} 
+Ridgeback is a midsize indoor robot platform that uses an omni-drive to move manipulators and heavy payloads with minimal constraints. 
+The omnidirectional base provides precision positioning in constrained environments and comes fully integrated with onboard computer, front laser scanner and an IMU. 
+Ridgeback offers native ROS and Gazebo integration and is compatible with a wide range of robot accessories.
+\begin{figure*}[h]
+    \centering
+        \begin{subfigure}[t]{0.34\textwidth}
+        \includegraphics[width=\textwidth]{rb_front}
+        \caption{Front}
+        %\label{fig:gull}
+    \end{subfigure}
+    ~
+    \begin{subfigure}[t]{0.34\textwidth}
+        \includegraphics[width=\textwidth]{rb_side}
+        \caption{Side}
+        %\label{fig:gull}
+    \end{subfigure}
+     %add desired spacing between images, e. g. ~, \quad, \qquad, \hfill etc. 
+      %(or a blank line to force the subfigure onto a new line)
+    \begin{subfigure}[t]{0.34\textwidth}
+        \includegraphics[width=\textwidth]{rb_top}
+        \caption{Top}
+        %\label{fig:tiger}
+    \end{subfigure}
+     ~%add desired spacing between images, e. g. ~, \quad, \qquad, \hfill etc. 
+    %(or a blank line to force the subfigure onto a new line)
+    \begin{subfigure}[t]{0.34\textwidth}
+        \includegraphics[width=\textwidth]{ridgeback}
+        \caption{Render}
+        %\label{fig:mouse}
+    \end{subfigure}
+    \caption{The Ridgeback mobile platform}\label{fig:ridgeback}
+\end{figure*}
+It is primarily designed for warehouseing applications as it is highly flexible in a controlled flat environment.
+The built in wheel odometry provides accurate local position estimates, with drift accumulating very slowly.
+For improved localization and obstacle avoidance, the navigation stack ROS package provides SLAM capability using the on-board LIDAR and IMU.
+%\begin{table}[]
+%\centering
+%\caption{Ridgeback specifications}
+%\label{table:ridgeback specs}
+%\begin{tabular}{@{}lll@{}}
+%\toprule
+%\textbf{Weight}&  135 kg& \\ \midrule
+%\textbf{Payload}& 100 kg&  \\ \midrule
+%\textbf{Speed}&  1.1 m/s&\\ \bottomrule
+%\end{tabular}
+%\end{table}
+
+\subsection{Hokuyo LIDAR}
+The Hokuyo UST-10LX Scanning Laser Rangefinder is a small, accurate, high-speed device for obstacle detection and localization of autonomous robots and automated material handling systems. 
+This model uses Ethernet interface for communication and can obtain measurement data in a wide field of view up to a distance of 10 meters with millimeter resolution.
+\begin{figure*}[t!]
+    \centering
+        \begin{subfigure}[t]{0.2\textwidth}
+        \includegraphics[width=\textwidth]{hokuyo_pic}
+    \end{subfigure}
+    \caption{The Hokuyo UST-10LX LIDAR}\label{fig:ur10}
+\end{figure*}
+This sensor uses a laser source to scan 270$^\circ$ field of view. Positions of objects in the range are calculated with step angle and distance. Sensor outputs these data through communication channel.
+
+\section{UR10} 
+The UR10 is Universal robotics largest collaborative industrial manipulator.
+It is a full 6DOF robotic arm capable of mimicking human arm movements.
+During operation it can handle weights up to 10 kg, making it viable for a wide range of tasks.
+The provided drivers enable performing collaborative tasks with human operators, allowing for easy positioning of the arm through compliant movement and preventing use of excessive force on impact.wwwww
+\begin{figure*}[t!]
+    \centering
+    \begin{subfigure}[t]{0.34\textwidth}
+        \includegraphics[width=\textwidth]{ur10_right}
+        \caption{Side}
+        %\label{fig:gull}
+    \end{subfigure}
+    \caption{The UR10 manipulator}\label{fig:ur10}
+\end{figure*}
+\begin{table}[]
+\centering
+\caption{UR10 specifications}
+\label{table:ur10 specs}
+\begin{tabular}{@{}lll@{}}
+\toprule
+\textbf{Weight}&  28.9 kg& \\ \midrule
+\textbf{Payload}&  10 kg&  \\ \midrule
+\textbf{Speed}&  Base and Shoulder joints: Max 120$^{\circ}$/s&  \\
+&  All other joints: Max 180$^{\circ}$/s&   \\
+&  Tool: approx 1 m/s& \\ \midrule
+\textbf{Repeatability}& $\pm0.01$ mm& \\ \midrule
+\textbf{Power consumption}& average 350 W& \\ \bottomrule
+\end{tabular}
+\end{table}
+The data in table \ref{table:ur10 specs} clearly shows that the UR10 manipulator is meant for tasks involving high precision and light payloads. 
+The repeatability value of $0.01$ mm shows that the UR10 can reach the same pose multiple times with a high degree of accuracy, which is important in industrial applications.
+Additionally, it's light weight and high end-effector modularity make it ideal for research purposes.
+
+\subsection{FT300}
+The UR10 on the Thing mobile manipulator has a variety of sensors built-in for use in various tasks.
+One such sensor is the FT300 force-torque sensor by Robotiq.
+In terms of mechanical fit, the Sensor has an embedded coupling to fit directly on the UR wrist. The tool side of the Sensor matches the UR bolt pattern. 
+It-s application range from impedance control to perception and contact calibration of the manipulator.
+\begin{figure*}[h,t!]
+    \centering
+        \begin{subfigure}[t]{0.34\textwidth}
+        \includegraphics[clip, trim=0cm 5cm 0cm 5cm, width=\textwidth]{FT300_pic}
+        \caption{Front}
+        %\label{fig:gull}
+    \end{subfigure}
+    ~
+    \begin{subfigure}[t]{0.34\textwidth}
+        \includegraphics[width=\textwidth]{FT300}
+        \caption{Side}
+        %\label{fig:gull}
+    \end{subfigure}
+    \caption{The UR10 manipulator}\label{fig:ur10}
+\end{figure*}
+
+\subsection{Robotiq Gripper}
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.3\textwidth]{robotiq}
+\caption{The Robotiq gripper}
+\end{figure}
+The Robotiq gripper is a three-fingered adaptive gripper used as the end effector on the UR10 manipulator.
+It is created for applications in advanced manufacturing and robotics research. 
+All the fingers can be independently position,velocity and force controlled and can exert forces from 50 to 60 $N$ at the finger tips.
+
+
+\chapter{State estimation}\label{chapter:State estimation}
+State estimation is one of the most often encountered problems when dealing with autonomous systems, as most algorithms require accurate information on the current state of the system.
+This type of system can be represented using non-linear system described by a difference equation and observation model with additive noise \footnote{we leave out separate expressions for input variables as they can be included within the functions $f$ and $h$}
+\begin{subequations}\label{state_space_nl}
+\begin{gather}
+x_k = f\left(x_{k-1}\right) + w_{k-1} , \ x \in \mathbb{R}^n \\
+z_k = h\left(x_k\right) + v_k, \ z \in \mathbb{R}^k
+\end{gather}
+\end{subequations}
+We define the estimation problem as finding the state estimate $\hat{x}_k$ given the measurements $z_0 \dots z_k$ subject to measurement noise $v$ and past states $x_0 \dots x_{k-1}$ subject to process noise $w$.
+Various algorithms have been developed that use different mathematical frameworks to find the best estimate according to some optimality criterion (\cite{thrun2005probabilistic}). %% TODO REFERENCES  
+\begin{figure}[h]
+\centering
+\includegraphics[scale=0.4]{Thingtr}
+\caption{The Thing mobile manipulator and the frames subject to estimation}
+\end{figure}
+
+The problem of state estimation for a mobile manipulator is twofold: it is necessary to estimate the pose of the end-effector in the frame of the mobile base while also localizing the mobile base itself in the workspace.
+The pose of the end-effector in the base frame is estimated using a kinematic model.
+Joint position values are used to provide a pose estimate, ignoring various dynamic and environment effects.
+Estimating the base state (\textit{localization}) is a more complex problem; the dynamic and environment effects on base movement significantly affect the steady-state.
+Consequently, in addition to kinematic models we have to rely on movement estimates from sensor data which is inherently noisy.
+The imperfect model and sensor data are fused in a single estimate using a probabilistic framework.
+
+In this chapter, we first define our state vector of interest in section \ref{section:State}. 
+Section \ref{section:Kinematics} contains details on the derivation of the kinematic model used in end-effector pose estimation assuming sufficient knowledge of the base pose. 
+The probabilistic framework used for estimating the base pose is described in section \ref{section:Localization}, where wheel and LIDAR odometry are fused to provide an accurate estimate.
+The focus of this chapter is estimating the pose of the end-effector and mobile base, but the methods are extendable to any frame on the platform.
+
+\section{State}\label{section:State}
+Most high-level control and task algorithms require information on the pose of the mobile manipulator frames in Cartesian space. 
+A frame pose represents complete informations about a frames position and orientation in a given reference frame.
+The pose is often represented by a \textit{homogenous transformation matrix} $T$
+\begin{align}
+T =
+\begin{bmatrix}
+R & p\\
+0 & 1\\
+\end{bmatrix}
+\label{transform}
+\end{align}
+The rotation matrix $R \in \mathbb{R}^{3x3}$ represents the orientation of the tool frame $t$ as seen in the global frame $0$, while translation is represented by the vector $p \in \mathbb{R}^3$.
+Estimating the matrix $T$ for the end-effector is a 9-dimensional problem which can be further reduced. 
+It is possible to fully define it the vector $r$ consisting of the translation vector $p$ and a \textit{quaternion} $q$
+\begin{align} \label{eq:pose}
+r_{EE}\left(T_{0}^{EE}\right) = 
+\begin{bmatrix}
+x& y& z& q_w& q_x& q_y& q_z
+\end{bmatrix}^T
+\end{align}
+We can reduce this even further for the mobile base, as it moves on a 2D plane and thus only rotates alongside one axis and has a constant $z$ coordinate
+\begin{align}
+r_{B}\left(T_{0}^{B}\right) = 
+\begin{bmatrix}
+x& y& \theta
+\end{bmatrix}^T
+\end{align}
+Our estimated state consists of end-effector and base poses comes in the form of a 10-dimensional \textit{task vector} $s$
+\begin{align}\label{eq:task_vector}
+s = 
+\begin{bmatrix}
+r_{EE}& r_B
+\end{bmatrix}^T
+\end{align}
+Using this representation, the state estimation problem has been reduced from 24 down to 10 dimensions.
+Reducing the dimensionality of the problem makes it computationally less expensive, which is vital for real-time operation.
+
+\section{Kinematic model}\label{section:Kinematics}
+If we disregard the various dynamic and environment effects, the Thing can be modelled as a manipulator.
+The Ridgeback platform is system with holonomic constraints and it's global position and the orientation can be viewed as a chain of two prismatic and a rotational joint. 
+These three joints make up the base upon which we add the kinematic model of the UR10 manipulator, which results in a system kinematically indistinguishable from a redundant manipulator.
+
+The UR10 joint position measurements are reasonably accurate and thus this model can be used to produce a valid state estimate of the local end-effector pose.
+Assuming valid estimates for the base position and orientation, this model will accurately represent the true state of the mobile manipulator.
+\subsection{Forward kinematics}\label{subsection:FK}
+We define forward kinematics as a set of equations that express the pose of a certain frame on a kinematic chain as a function of configuration-space values $q$
+\begin{align}\label{eq:config_matrix}
+q = 
+\begin{bmatrix}
+q_0& q_1& q_2& q_3& q_4& q_5& \hat{x}& \hat{y}& \hat{\theta}
+\end{bmatrix}^T \quad .
+\end{align}
+The equations are commonly derived using the transforms defined in \eqref{transform}.
+The transform between two frames can be defined as a function of only four parameters using the Denavit-Hartenberg notation.
+\begin{align}
+T_{k-1}^k(d, \ \theta, \ a, \ \alpha)
+=
+\begin{bmatrix}
+\cos\theta_{k}& -\cos\alpha_{k}\sin\theta_{k} & \sin\alpha_{k}\sin\theta_{k} & a_k\cos\theta_{k}\\
+\sin\theta_{k}& \cos\alpha_{k}\cos\theta_{k} & -\sin\alpha_{k}\cos\theta_{k} & a_k\sin\theta_{k}\\
+0 & \sin\alpha_{k} & \cos\alpha_{k} & d_{k}\\
+0 & 0 & 0 & 1\\
+\end{bmatrix} \quad .
+\label{homogenous}
+\end{align}
+The parameters $a, \alpha$ are usually constant and represent the structure, while $d, \theta$ represent the prismatic and rotational joint values and biases.
+Using the DH parameters as defined in table \ref{DH}, we derive all the transforms \eqref{homogenous} from global frame to the end effector frame.
+Multiplying these transforms gives us the transform from the global frame to any frame of the mobile manipulator
+\begin{equation}
+T_{0}^{EE} = \prod_{k=1}^{N_{EE}} T_{k-1}^{k} \quad .
+\label{FK}
+\end{equation}
+The forward kinematics model is subject to various joint angle and link length biases, as it is possible the given DH parameters do not exactly correspond to the physical manipulator.
+However the estimate provided is still has an error significantly lower than the error resulting from base localization and thus can be disregarded in the current analysis.
+
+It is also interesting to note that the forward kinematics equations are non-injective surjective functions. 
+Every $q$ corresponds to only one pose $T$, even though a given $T$ might correspond to multiple values of $q$.
+The analytic formulation of the transform from the global frame to the end-effector can be found in the appendix.
+\subsection{Differential forward kinematics}
+Equations defined in \ref{subsection:FK} provide an estimate of the end-effector and base pose using the configuration vector $q$. 
+However, algorithms used in motion planning and trajectory optimization require information on how configuration change affects the pose.
+This information is contained within the manipulator Jacobian $J$.
+We define the Jacobian $J$ as the derivative of the function $f\left(x\right) \ : \mathbb{R}^n \rightarrow \mathbb{R}^k $ with respect to the vector $z$.
+\begin{align}\label{eq:jacobian}
+J =
+\begin{bmatrix}
+    \dfrac{\partial {f_1}}{\partial x_{1}}      & \dfrac{\partial {f}_{1}}{\partial x_{2}}  & \dots & \dfrac{\partial {f}_{1}}{\partial x_{n}}  \\
+    \dfrac{\partial{f_2}}{\partial x_{1}}      & \dfrac{\partial {f}_{2}}{\partial x_{2}}  & \dots & \dfrac{\partial {f}_{2}}{\partial x_{n}} \\
+    \vdots \\
+    \dfrac{\partial {f_k}}{\partial x_{1}}      & \dfrac{\partial {f}_{k}}{\partial x_{2}}  & \dots & \dfrac{\partial {f}_{k}}{\partial x_{n}}
+\end{bmatrix}
+\end{align}
+Now $\dot{f}$ can be calculated by multiplying the matrix with $\dot{x}$
+\begin{align} \label{eq:jacobian_identity}
+\dot{f} = J \dot{x}
+\end{align}
+For a sufficiently small $\Delta$, equation \ref{eq:jacobian_identity} can be extended to produce a first order approximation $\hat{f}_k$ 
+\begin{align} \label{eq:jacobian_estimate}
+\hat{f}_k = f_{k-1} + J\left(x_{k} - x_{k-1}\right)
+\end{align}
+This framework can be employed in various state estimation and motion planning algorithms.
+\subsubsection{End-effector Jacobian}
+The end-effector Jacobian is defined as the derivative of the end-effector pose \ref{eq:pose} with respect to the configuration vector $q$.
+While it can be derived analytically, it is often simpler to derive it using the geometry of the chain.
+Here the Jacobian takes the form 
+\begin{equation}
+J =
+\begin{bmatrix}
+J_{v} \\ 
+J_{\omega}
+\end{bmatrix}
+\label{jacob1}
+\end{equation}
+Where the matrix $J_v$ is the position Jacobian and $J_{\omega}$ matrix is the orientation Jacobian.
+In this case, the components representing orientation change are equal to the rotation axes of the joint $q_j$.
+\begin{align}
+J_{\omega_j} = \dfrac{\partial o}{\partial q_j} = z_{j}
+\end{align}
+The components representing position difference for rotational joints are
+\begin{equation}
+J_{v_j} = \dfrac{\partial p}{ \partial q_{j}} = z_j \times (w - p_j)
+\end{equation}
+For prismatic joints, this element is equal to the rotation axis
+\begin{equation}
+J_{v_j} = \dfrac{\partial p}{ \partial q_j} = z_j
+\end{equation}
+Resulting in the geometric Jacobian matrix
+\begin{equation}
+J =
+\begin{bmatrix}
+z_{0} \times (w - p_{0}) &z_{1} \times (w - p_{1}) &\ldots &z_{n-1} \times (w - p_{n-1})\\
+z_{0} &z_{1} &\ldots &z_{n-1}\\
+\end{bmatrix}
+\label{jacob2}
+\end{equation}
+The pose change vector $w$ is defined as the composition of translational and rotational velocities.
+For small enough pose difference $\Delta r$, the vectors are approximately equal
+\begin{align}\label{eq:pose_diff}
+w  = 
+\begin{bmatrix} 
+v \\ \omega 
+\end{bmatrix} 
+\approx 
+\begin{bmatrix}
+\Delta p \\
+\Delta o
+\end{bmatrix}
+= 
+\Delta r
+\end{align}
+Calculating the position difference is straightforward and comes down to subtracting the goal and current positions
+\begin{align}
+\Delta p = p - p_{goal} 
+\end{align}
+The orientation difference is calculated as follows (detailed derivation in appendix)
+\begin{subequations}\label{eq:pose difference}
+\begin{gather}
+\Delta o = 0.5 L^{-1} \left( n_c\times n_d + s_c\times s_d + a_c\times a_d \right) \\
+L = - 0.5 \left(\left[n_c\right]_{\times}\left[n_d\right]_{\times} + \left[s_c\right]_{\times}\left[s_d\right]_{\times} 
++ \left[a_c\right]_{\times}\left[a_d\right]_{\times} \right)
+\end{gather}
+\end{subequations}
+\section{Localization}\label{section:Localization}
+When considering the kinematic model sufficiently accurate base pose estimates $x,y,\theta$ are assumed.
+In reality, obtaining accurate pose estimates is non-trivial and often requires fusing sensor data while taking in to account the probabilistic nature of measurements.
+
+Localization of the Thing mobile manipulator employs a motion model of the omni-directional drive on the Ridgeback and data provided by the LIDAR.
+The wheel and LIDAR odometry provide Cartesian velocity estimates with covariance data.
+This data is fused using an extended Kalman filter and the resulting estimate is more accurate than simply integrating odometry data.
+\subsection{Wheel odometry}
+In classical mechanics a system may be defined as \textit{holonomic} if all constraints of the system are holonomic. For a constraint to be holonomic it must be expressible as a function:
+\begin{align}
+f(x_1,\ x_2,\ x_3,\ \ldots,\ x_N,\ t)=0
+\end{align} 
+i.e. a holonomic constraint depends only on the coordinates $x_j$ and time $t$. It does not depend on the velocities or any higher order derivative with respect to time $t$.
+Decoupled translational and angular velocities make the estimation process less prone to error, as angular velocities are usually much more difficult to estimate.
+Having wheel encoder velocity readings $w_0,w_1,w_2,w_3$, a Cartesian velocity estimate for the base can be calculated
+\begin{align}
+\begin{bmatrix}
+\dot{x} \\
+\dot{y} \\
+\dot{\theta}
+\end{bmatrix}
+= 
+\frac{R}{4}
+\begin{bmatrix}
+1 &1 &1 &1 \\
+-1 &1 &-1 &1 \\
+-\frac{1}{k} &-\frac{1}{k} &\frac{1}{k} &\frac{1}{k}
+\end{bmatrix}
+\begin{bmatrix}
+w_0 \\
+w_1 \\
+w_2 \\ 
+w_3
+\end{bmatrix} \quad .
+\end{align}
+Integrating these velocities makes it possible to localize the base relative to the starting position.
+Odometry estimates are assumed to have a normal distribution, accounting for measurement noise and kinematic nature of the model (ignores dynamic effects)
+\begin{align}\label{eq:wheel_sigma}
+r_{B} \sim \mathcal{N}(\mu_{r_B},\,\Sigma)\,.
+\end{align}
+The covariance matrix $\Sigma$ in \eqref{eq:wheel_sigma} is set to a constant value empirically found to sufficiently represent estimate uncertainty
+\begin{align}
+\Sigma 
+=
+diag\left(0.001,0.001,0.001,100000,100000,0.03\right)\,.
+%\begin{bmatrix}
+%0.001& 0& 0& 0& 0& 0 \\
+%0& 0.001& 0& 0& 0& 0 \\
+%0& 0& 0.001& 0& 0& 0 \\
+%0& 0& 0& 1000000& 0& 0 \\
+%0& 0& 0& 0& 1000000& 0 \\
+%0& 0& 0& 0& 0& 0.03 
+%\end{bmatrix}
+\end{align}
+\subsection{LIDAR odometry}
+\subsection{Extended Kalman filter}
+The wheel and LIDAR odometry data is fused using an Extended Kalman Filter \footnote{EKF in rest of text}\citep{MooreStouchKeneralizedEkf2014}.
+A process and observation model is used to represent the movement of the Thing mobile manipulator:
+\begin{subequations}\label{state_space_nl2}
+\begin{gather}
+x_k = f\left(x_{k-1}\right) + w_{k-1} , \ x \in \mathbb{R}^n \\
+z_k = h\left(x_k\right) + v_k, \ z \in \mathbb{R}^k
+\end{gather}
+\end{subequations}
+Without going in to the detail on the derivation of the EKF algorithm, it can be described as having two steps.
+The model forecast step uses the motion model and last estimated state $\hat{x}_k^+$ to produce an \textit{a priori} estimate of the next state $\hat{x}_k^-$ and covariance $P_k^-$
+\begin{subequations}\label{eq:nl_forcast}
+\begin{gather}
+\hat{x}_k^- = f\left(\hat{x}_{k-1}^+\right) \\
+P_k^- = J_f\left(\hat{x}_{k-1}^+\right)P_{k-1}^+J_f^T\left(\hat{x}_{k-1}^+\right) + Q_{k-1}
+\end{gather}
+\end{subequations}
+The correction step makes use of local sensor odometry to calculate the \textit{Kalman gain} $K_k$ and produce \textit{a posteriori} estimates $\hat{x}_k^+$ and $P_k^+$ 
+\begin{subequations}\label{eq:nl_correction}
+\begin{gather}
+\hat{x}_k^+ \approx \hat{x}_k^- + K_k\left(z_k - h\left(\hat{x}_k^-\right)\right) \\
+P_k^+ = \left(I - K_kJ_h\left(\hat{x}_k^-\right)\right)P_k^- \\
+K_k = P_k^-J_h^T\left(\hat{x}_k^-\right)\left(J_h\left(\hat{x}_k^-\right)P_k^-J_h^T\left(\hat{x}_k^-\right) + R_k\right)^{-1} 
+\end{gather}
+\end{subequations}
+The $J_f$ and $J_h$ matrices in \eqref{eq:nl_forcast} \eqref{eq:nl_correction} represent the process and measurement model Jacobians, while the process and measurement noise covariance is represented by the $Q$ and $R$ matrices.
+Estimates provided by \eqref{eq:nl_forcast} \eqref{eq:nl_correction} are first-order estimates, higher order estimators of this type exist but are computationally infeasible for real-time applications.
+
+It is also important to note that the EKF assumes white Gaussian noise and thus can only be successfully applied when the actual process and measurement noise have a near-Gaussian distribution.
+
+
+
+
+
+
+
+
+
+
+
+\chapter{Motion planning}\label{chapter:motion planning}
+%%%In the case of positioning redundant chains in Cartesian space, the configuration space (joints and Ridgeback pose) of the end effector contains a higher number of dimensions than the task space.
+%%This results in an infinite number of solutions to any task space goal. 
+%%Since in this case closed-form inverse kinematic equations are not available, we resort to an optimization approach.
+%%Within the optimization problem we define constraints that make the number of solutions finite, resulting in convergence.
+As mentioned in chapter \ref{chapter:State estimation}, the primary motion planning objective consists of reaching the desired pose with the end-effector and mobile base.
+However, moving the mobile manipulator safely and efficiently in the workspace is more involved and significantly constrains the primary objective. 
+For instance, it is important to maintain distance from obstacles both with the platform and the manipulator.
+Additionally, various other performance metrics exist which may need to be maximized or maintained above a certain value.
+These objectives and constraints can be formalized in a way that fits the motion planning problem.
+
+In section \ref{section:inverse kinematics} the \textit{inverse kinematics} problem is considered for mobile manipulator.
+This involves finding an configuration $q$ that corresponds to a given end-effector pose $r$.
+Section \ref{section:redundancy resolution} explores the problem of utilizing the extra degrees of freedom of the system to optimize movement, also referred to as \textit{redundancy resolution}.
+The remaining sections explore two different approaches to redundancy resolution: \textit{task-priority} and s\textit{equential convex optimization}. 
+The classic task-priority algorithm is computationally efficient extension to the optimization approach for inverse kinematics, but also highlights the drawbacks of a purely linear optimization algorithm.
+A more contemporary approach of sequential convex optimization provides a more general and powerful optimization infrastructure that is highly modular, at the cost of computational efficiency.
+\section{Inverse kinematics}\label{section:inverse kinematics}
+Regulating kinematic tasks that are configuration dependent reduces to the problem
+\begin{align}
+f\left(q\right) = 0 %% TODO check this
+\end{align}
+where $q \in \mathbb{R}^{n} $  is the configuration vector. 
+The classical approach to inverse kinematics would have us find the inverse of the function $f$
+\begin{align}
+q = f^{-1}\left(0\right)
+\end{align}
+However, this inverse only exists in simple and non-redundant configurations, otherwise the solutions are infinite.
+Even in cases where the configuration is non-redundant , the inverse function is still sometimes impossible to derive.
+In order to solve this problem, an optimization approach which avoids dealing with complicated analytical expressions is employed.
+\subsection{Differential inverse kinematics}
+In an inverse differential kinematics scheme used for redundant kinematic chains, $f\left(q\right)$ is regulated to the target value using
+\begin{align}
+\label{diffik_1}
+\frac{\partial}{\partial q}f = -\lambda_{f}f\left(q\right), \lambda_{f} > 0
+\end{align}
+The solution to \ref{diffik_1} is often rank-deficient, so a least squares formulation is employed
+\begin{align}
+\label{diffik_2}
+\min\limits_{\dot{q}} & \frac{1}{2}\left\Vert\frac{\partial f}{\partial q} \dot{q} + \lambda_{f}f\left(q\right)\right\Vert^2, \lambda_{f} > 0
+\end{align}
+Letting $J = \frac{\partial f}{\partial q}$ and $a = -\lambda_{f}f\left(q\right)$, the solution to \ref{diffik_2} that minimizes the $L_{2}$ norm is given by finding the pseudoinverse of the $A$ matrix
+\begin{align}
+\label{diffik_4}
+\dot{q} = J^{\dagger}a 
+\end{align}
+\subsection{The Jacobian pseudoinverse and numerical filtering}
+In \eqref{diffik_1}-\eqref{rresolution_2}, the pseudoinverse operation denoted by $\dagger$ is defined as 
+\begin{align}
+J^{\dagger} = J^T\left(JJ^T\right)^{-1}
+\end{align}
+While still more numerically stable than an outright inverse , this method is also subject to \textit{kinematic singularities} in the manipulator.
+These are configurations where a large configuration change is required for a given task as seen by the linearized system.
+The components of the task Jacobian $\frac{\partial f}{\partial q}$ then approach 0, resulting in loss of rank.
+Implementing the pseudo-inverse in a numerically stable way is very important for robustness and non-trivial.
+\subsubsection{Damped psudoinverse}
+We often use the more numerically stable \textit{damped pseudoinverse} \citep{chan1988general}
+\begin{align}
+J^{\#} = J^T\left(JJ^T + \lambda I\right)^{-1} ,  \lambda \in \mathbb{R}
+\end{align}
+There are also various contemporary approaches to implementing the pseudoinverse \citep{chiaverini1994review}. 
+In this work we use the \textit{selectively damped pseudoinverse} \citep{buss2005selectively}, alongside with \textit{singular value filtering} described in \citep{colome2015closed}.
+\subsubsection{Selectively damped pseudoinverse}
+The matrix pseudoinverse operation can be performed using an SVD decomposition of the Jacobian
+\begin{align}
+J = \sum\limits_{i}{\sigma_{i}u_iv_i^T}
+\end{align}
+\begin{align}
+J^T\left(JJ^T\right)^{-1} = \sum\limits_{i}{\frac{1}{\sigma_{i}}v_iu_i^T}
+\end{align}
+The damped pseudoinverse would in this case have the form 
+\begin{align}
+J^T\left(JJ^T + \lambda I\right)^{-1} = \sum\limits_{i}{\frac{\sigma_{i}}{\sigma_{i}^2 + \lambda}v_iu_i^T}
+\end{align}
+The \textit{selectively damped pseudoinverse} \citep{buss2005selectively} equates to choosing a specific value $\lambda_i$ for each singular value $\sigma_i$
+\begin{align}\label{eq:sdp}
+J^{\#} = \sum\limits_{i}{\frac{\sigma_{i}}{\sigma_{i}^2 + \lambda_i}v_iu_i^T}
+\end{align}
+\subsubsection{Singular value filtering}
+The singular values of a Jacobian determine it's stability with respect to inversion.
+Lower singular values indicate that the matrix is closer to being singular.
+A proposed approach to solving this problem prior to using a specific inversion technique is \textit{singular value filtering} \citep{colome2012redundant}. 
+This technique sets the lowest singular value of a given jacobian matrix $J$ to $\sigma_0$
+\begin{align}\label{eq:svf}
+h_{v,\sigma_0}\left(\sigma\right) = \frac{\sigma^3 + v\sigma^2 + 2\sigma + 2\sigma_0}{\sigma^2 + v\sigma + 2}\,.
+\end{align}
+In \eqref{eq:svf} the shape factor $v$ determines the difference between modified and original singular values $h_{v,\sigma_0}(\sigma)-\sigma$, a higher $v$ results in lower differences. This results in a new Jacobian matrix
+\begin{align} \label{eq:svf jacobian}
+\hat{J}= \sum\limits_{i}{h_{v,\sigma_0}(\sigma_i)u_iv_i^T}
+\end{align}
+Authors report that combining this filtering method with any of the above pseudoinverse approaches results in higher stability.
+\section{Redundancy resolution}\label{section:redundancy resolution}
+Given that the valid set of solutions to \ref{diffik_2} is in an affine subspace $\mathcal{F} \in \mathbb{R}^n$, the minimization scheme for solving a lower priority set of tasks would be
+\begin{align}
+\label{diffik_3}
+\min\limits_{\dot{q} \in \mathcal{F}} & \frac{1}{2}\left\Vert\frac{\partial g}{\partial q} \dot{q} + \lambda_{g}f\left(q\right)\right\Vert^2 , \lambda_{g} > 0
+\end{align}
+The process of defining additional constraints for a redundant system, thus reducing the affine subspace $\mathcal{F}$ is called \textit{redundancy resolution}.
+The general solution to \eqref{diffik_3}, which minimizes the $L_2$ norm of the primary task while making redundant DOFs available to other inputs $z$ has the form
+\begin{align}
+\label{rresolution_0}
+\dot{q} = J^{\#}a + \left(I - J^{\#}J\right)z ,  z \in \mathbb{R}^n
+\end{align}
+The operator $\left(I - J^{\#}J\right)$ is an orthogonal projector, thus the effect of the control $z$ will not affect the outcome in a way that cancels out the first term. 
+\section{Task-prioity kinematics}\label{section:task priority}
+In \citep{nakamura1987task,nakamura1990advanced}, \textit{null-space optimization} is utilized to achieve execution of a secondary task $B$ given a primary task $A$
+\begin{subequations}
+\begin{gather}
+\label{rresolution_1}
+\dot{q}  = A^{\dagger}a + \left(I - A^{\dagger}A\right)\tilde{B}^{\dagger}\left(b - BA^{\dagger}a\right) + 
+\left(I - A^{\dagger}A\right) \left(I - \tilde{B}^{\dagger}\tilde{B}\right)z\, ,\\
+\tilde{B}  = B\left(I - A^{\dagger}A\right)\, .
+\end{gather}
+\end{subequations}
+This \textbf{task-priority} approach to inverse kinematics can be extended to any number of tasks \citep{slotine1991general}.
+The main weakness of task-priority lies in the fact that lower-priority tasks will often become infeasible, causing the occurrence of an \textit{algorithmic singularity} \citep{baillieul1985kinematic}.
+In \citep{chiaverini1997singularity}, a modified approach is introduced , which guarantees robustness 
+\begin{align}
+\label{rresolution_2}
+\dot{q} = A^{\dagger}a + \left(I - A^{\dagger}A\right)B^{\dagger}b + 
+\left(I - \left(A \atop B\right)^{\dagger}\left(A \atop B\right)\right)z
+\end{align}
+Here the trade-off is lower accuracy and slower convergence because the expression is only an approximation of \eqref{rresolution_1}.
+\subsection{Motion planning scheme}
+The motion planning scheme implemented using the task priority formulation is focused on simplicity and robustness rather than optimal movement.
+The primary task is reaching a goal pose with the end effector, which is vital for most mobile manipulator applications. 
+The secondary task handles mobile base trajectory following.
+As mentioned in \ref{section:task priority}, this framework can be extended to any number of tasks, but the increasing numerical instability results in diminishing returns.
+\begin{align}
+\label{rresolution_3}
+\Delta q \approx J_{EE}^{\dagger}\Delta r_{EE} + \left(I - J_{EE}^{\dagger}J_{EE}\right)J_{B}^{\dagger}\Delta r_{B}
+\end{align}
+\subsection{Drawbacks}\label{subsec:tp drawbacks}
+The main drawback to task-priority kinematics in \eqref{rresolution_1} and \eqref{rresolution_2} is that they cannot natively handle nonlinear inequality constraints \citep{moe2016set} and equality constraints. 
+Having the ability to define this type of constraint in motion planning is important for more complex systems such as mobile manipulators.
+
+There are currently no open-source implementations for task-priority schemes , as the parameters and structure of the 
+scheme vary greatly depending on the tasks and kinematic chain structure.
+A more general definition of the problem as a non-linear constrained optimization problem would allow us to utilize the vast array of open-source solvers, implementations and solution schemes developed for a wider range of problems.
+\section{Sequential convex optimization}\label{section:sqp}
+Performing tasks with a kinematic chain can also be formulated as a bounded non-linear optimization problem $P$. 
+The non-linear objective function $f$ is minimized subject to non-linear inequality and equality constraints $g , h$, while keeping the parameter vector $x$ within bounds. 
+\begin{align}
+\label{optik_1}
+\begin{array}{rl}
+\min\limits_{x} & f(x) \\
+\mbox{s.t.} & x \in \left[x_{min}, x_{max}\right] \\
+  & g(x) \le C_{g} \\
+  & h(x) = C_{h}
+\end{array}
+\end{align}
+We can solve this problem iteratively, by repeatedly constructing and minimizing a convex approximation of the problem $\tilde{P}$ until constraints are satisfied. With $\tilde{f}$ being the quadratic approximation of the objective function $f$,
+\begin{align}
+\label{optik_2}
+\tilde{f}\left(x\right) = f\left(x^k\right) + \nabla f\left(x^k\right)\left(x - x^k\right) + \frac{1}{2}\left(x - x^k\right)^T Hf\left(x^k\right)\left(x - x^k\right)
+\end{align}
+ and $\tilde{g}, \tilde{h}$ being local affine approximations of constraint functions
+ \begin{eqnarray}
+ \begin{split}
+ \label{optik_3}
+\tilde{g}\left(x\right) = g\left(x^k\right) + \nabla g\left(x^k\right)\left(x - x^k\right) \\
+\tilde{h}\left(x\right) = h\left(x^k\right) + \nabla h\left(x^k\right)\left(x - x^k\right) 
+\end{split}
+\end{eqnarray}
+Using quadratic programming (QP) techniques, we solve $\tilde{P}$
+\begin{align}
+\label{optik_4}
+ \begin{array}{rl}
+\min\limits_{x} & \mathcal{L}\left(x,\mu\right)\\
+\mbox{s.t.} & x \in \left[x_{min}, x_{max}\right]
+\end{array}
+\end{align}
+Where $\mathcal{L}\left(x,\mu\right)$ represents the problem Lagrangian
+\begin{align}
+\label{optik_5}
+\mathcal{L}(x,\mu) = \tilde{f}\left(x\right) + \mu\sum\limits_{i = 1}^{i_{max}}{\tilde{g}_{i}\left(x\right)}
++ \mu\sum\limits_{j = 1}^{j_{max}}{\tilde{h}_{j}\left(x\right)}
+\end{align}
+The Lagrange multiplier $\mu > 0 \in \mathbb{R}$ is a large positive value that regulates the priority of constraints over the objective function. Setting a sufficiently large value for $\mu$ turns the problem into a constraint satisfaction problem
+\begin{align}
+\label{optik_6}
+\mathcal{L}(x,\mu) \approx \sum\limits_{i = 1}^{i_{max}}{\tilde{g}_{i}\left(x\right)}
++ \sum\limits_{j = 1}^{j_{max}}{\tilde{h}_{j}\left(x\right)}\, ,
+\end{align}
+ignoring main objective function minimization in lieu of satisfying constraints.
+\subsection{Modeling objective and constraint functions}
+The objective function $f\left(x\right)$ can include various terms relating to kinematic and dynamic behaviour of the kinematic chain.
+An important thing to keep in mind is that these constraints
+\subsubsection{Minimizing state change}
+In kinematic planning $f\left(x\right)$ is often employed to keep the chain in a configuration close to the seed configuration $x_{seed}$
+\begin{align}
+\label{optik_7}
+f\left(x\right) = \left(x - x_{seed}\right)W\left(x - x_{seed}\right)^{T}\, .
+\end{align}
+This results in more predictable solutions to the problem, often avoiding non-modelled dynamic constraints resulting from large changes in configuration.
+\subsubsection{Pose control}
+We regulate the execution of a pose goal $r$ using equality constraint functions of the type
+\begin{align}
+\label{eq:optik_8_aux}
+\Delta r = 0\, .
+\end{align}
+Convexifying \eqref{eq:optik_8_aux} results in the familiar linear equation
+\begin{align}
+\label{eq:optik_8}
+h\left(x\right) = \left\vert J\left(x - x_{k}\right) - \Delta r \right\vert = 0\, .
+\end{align}
+In the case of a Cartesian task-space, the error between target pose and current pose in \eqref{eq:optik_8} can be represented in the form of a 6d vector
+\begin{align}
+\Delta r = \log\left(T_{target}^{-1}\left(a\right) T_{current}\left(x\right)\right)
+\end{align}
+The $\log$ operator here is the matrix $\log$ operator (further explain later).
+This vector can also be obtained using identities \eqref{eq:pose difference}.
+\subsubsection{Obstacle avoidance}
+Obstacle avoidance can be handled as an inequality constraint in the NL optimization problem.
+The simplest way of implementing this is using the constraint function
+\begin{align}
+g\left(x\right) = \left\vert p_{base} - p_{obstacle} \right\vert \leq R
+\end{align}
+This can in turn be extended to any number of obstacles.
+Collision checking libraries are often used to find a set of closest points for which to optimize.
+\subsubsection{Manipulability maximization}
+Having a metric $M$ that describes the distance from singularity of the system Jacobian, we could use the scheme in \eqref{optik_1} to optimize task execution.
+The manipulability metric of a kinematic chain has a couple of different definitions, the one used here is
+\begin{align}
+M = \sqrt{\det{\left(JJ^T\right)}}
+\end{align}
+Here $J$ is the kinematic chains Jacobian with respect to the Cartesian (although not necessarily) task-space.
+Through matrix manipulation it is possible to obtain a closed-form expression for the manipulability Jacobian
+\begin{align}
+\frac{\partial M}{\partial x} = \frac{1}{2\sqrt{\det{\left(JJ^T\right)}}} Tr\left(\left(JJ^T\right)^{-1}\frac{\partial \left(JJ^T\right)}{\partial x}\right)
+\end{align}
+It might be possible to get this expression in symbolic form, but can be inefficient for real-time applications.
+Even though maximizing the manipulability measures increases the product of singular values, it does not mean that the smallest singular value will be sufficiently large. 
+Another metric which minimizes size difference between singular values is the \textit{condition number} $\kappa$
+\begin{align}\label{eq:condition number}
+\kappa = \frac{\sigma}{\sigma_0}\, .
+\end{align}
+This value will ideally be close to $1$, which means all the singular values are roughly the same magnitude.
+However this does not maximize the magnitude of singular values itself.
+The objective function to maximize a combination of these two metrics
+\begin{align}
+\label{mnptik_1}
+f\left(x\right) = \sqrt{\frac{\kappa}{M}}
+\end{align}
+In the context of the mobile manipulator following both an end effector and base trajectory, this means that the optimization will utilize the mobile base orientation $\theta$ to maximize manipulability while ensuring that all the singular values are roughly the same magnitude.
+\subsection{Motion planning scheme}
+The full motion planning scheme can now be presented as an non-linear optimization problem. 
+The parameter vector is in the case the configuration vector of the mobile manipulator as defined in \eqref{eq:config_matrix}
+\begin{align}
+\begin{array}{rl}
+\label{mnptik_2}
+\min\limits_{q} &  \sqrt{\frac{\kappa}{M}}\\
+\mbox{s.t.} & \Delta r_{EE} = 0, \\ 
+& \left(q_{x} - x_{goal}\right)^2 + \left(q_{y} - y_{goal}\right)^2 \le R^2 , \\
+& q_{arm} \in \left[q_{min}, q_{max}\right] , \\
+& q_{\theta} \in \left[-\theta , +\theta \right]\, .
+\end{array}
+\end{align}
+The objective function is the modified manipulability metric from \eqref{mnptik_1}, minimizing this function drives the manipulator away from singular configuration.
+The end-effector pose trajectory is introduced as a convex constraint function, alongside with the base position and orientation tolerances used for optimization.
+Additionally, we limit the search space to within the joint limits $[q_{min}, q_{max}]$.
+%\begin{figure}[H]
+%    \centering
+%        \includegraphics[clip, trim=0cm 8cm 0cm 1cm, width = 0.75\textwidth]{Thing.pdf}
+%    \caption{Relaxing the Ridgeback pose constraints depending on the localization covariance, lower covariance gives more space to optimize for manipulability}
+%    \label{fig:somthing}
+%\end{figure}
+\subsection{The SQP algorithm}
+Sequential convex optimization optimization can be tackled using sequential quadratic programming (SQP) \citep{schulman2013finding, xu2010two}, a powerful algorithm which repeatedly constructs and minimizes a convex approximation of the problem $\tilde{P}$ until constraints are satisfied.
+\paragraph*{Convexify}
+For each point in the desired trajectory and the penalty value $\mu$, we form convex cost functions at the operating point.
+\paragraph*{Minimize}
+The convexified problems are minimized, where the parameter values being considered are subject to the trust region $\delta$.
+This prevents the minimization process from taking big steps when the convex approximations do not reflect the real situation.
+\paragraph*{Trust Region}
+At each iteration of the innermost for loop, a trust region $\delta$ for the QP problem is updated depending on how well the change proposed by the minimization algorithm reflect the change of the non-convex models of the cost functions. 
+\begin{algorithm}
+\label{optik_alg}
+\caption{SQP}
+\begin{algorithmic}
+\For{$\mu = 10^0 , 10^1, 10^2 ...$}
+\For{$i = 1, 2, ..., ITER\_LIMIT$} 
+\State $\tilde{f}, \tilde{g}, \tilde{h} \gets$ Convexify($f,g,h$)
+\Comment convexify problem
+\For{$j = 1, 2, ...$} 
+\State $ \begin{array}{rl} \min\limits_{q} & G(\tilde{f}, \tilde{g}, \tilde{h}) \\
+ \mbox{s.t.} & q \in \left[q - \delta, q + \delta \right] \end{array}$
+\Comment minimize \eqref{optik_4}
+\If {TrueImprove / ModelImprove $\ge$ c} 
+    \State $\delta \gets \tau^+ \delta$
+    	\Comment expand trust region
+    \State \textbf{break}
+\EndIf
+\State $\delta \gets \tau^- \delta$
+\Comment shrink trust region 
+\If{converged()}
+    \State \textbf{return} solution
+\EndIf
+\EndFor
+\EndFor
+\EndFor
+\end{algorithmic}
+\end{algorithm}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\chapter{Software architecture}
+With the theoretical framework for state estimation and motion planning established in chapters \ref{chapter:State estimation} and \ref{chapter:motion planning}, this chapter describes the software implementation of these ideas.
+Developing code that is intuitively structured is key in a research context, where it is often maintained and expanded by multiple parties.
+Maintaining a heavily tested core code-base which allows modular drop-in components for high level functions is an optimal development strategy for such cases.
+Such a structure expedites testing and data gathering procedures, as it enables quick start-up, user safety and damage prevention.
+
+In section \ref{section:overview} development considerations are explained in more detail and a high-level overview of the software architecture is presented.
+Next, in \ref{section:code state estimation} and \ref{section:code motion planning} state estimation and motion planning pipelines are presented in more detail.%, focusing on the modularity aspect.
+Lastly, section \ref{section:control} describes the control pipeline that relays user commands to the API and internal control loops. %%Due to closed-source control code being used in the robots internally, we omit the details of the algorithms themselves in lieu of explaining interfacing strategies with the low-level APIs.
+
+\section{Overview}\label{section:overview}
+Developing software for a complex system such as the Thing mobile manipulator is a time-consuming process, as each change requires extensive testing before it can be applied safely.
+Aside from maintaining a strict version control strategy with tools such as \textit{git}, the developer needs to have an idea of what interaction a given change can have with the rest of the code-base as it is often inefficient to test every change in detail.
+Structuring the code in a way that decouples most of the heavily-tested core functionalities from specific user tasks is of great importance since it helps the developer maintain an idea of what certain changes can affect.
+
+The testing procedure on the real robot suffers from a high set-up cost, which can be reduced by having start-up procedures stored in the form of ROS launch files.
+Having a simulation that reasonably models the robots behaviour also expedites testing, as some concepts remain largely unaffected by dynamic effects occurring in reality.
+Furthermore, platform-agnostic code is maintained, meaning that the software does not differentiate between the simulated and real systems, drastically reducing implementation time.
+\subsection{Architecture}
+The network-based nature of ROS systems allows a distributed software architecture.
+This enables keeping real-time dependent functionalities on the robot while running high level algorithms on a separate machine.
+Specifically, the control algorithms implemented in \verb|ros_control| interface with the local UR10 and Ridgeback drivers and are ran on the robot's local machine which acts as a server.
+Task-specific programs are ran on a separate machine or client which connects to the Thing's ROS core via WiFi or ethernet.
+\begin{figure}\label{fig:overview}
+\includestandalone[width=\textwidth]{slike/software_tikz}
+\caption{Overview of the software architecture. White rounded rectangles represent ROS packages, while cross-hatched rectangles represent individual libraries/headers/executables.}
+\end{figure} 
+
+\subsubsection{Client}
+Figure \ref{fig:overview} shows how the \verb|thing_control| package forms a robust core of the code-base.
+It acts as a central node which processes trajectories and commands sent by the user, which includes:
+\begin{itemize}
+  \item Receiving and processing data streams from the robot
+  \item Sending joint-level commands to the lower-level control architecture
+  \item Processing (solving) Cartesian trajectories sent by the user
+  \item Monitoring incoming data streams and implementing security procedures
+\end{itemize}
+Receiving and sending data is done through the ROS topic interface; subscribers fetch structured data from network locations called topics which are populated using publishers.
+
+At compile time, the user can choose a motion planner developed specifically for the Thing mobile manipulator.
+These planners inherit from a core part of the code-base, the \verb|thing_kinematics| library.
+This library contains the common mathematical framework for the motion planners as well as various useful kinematics functions:
+\begin{itemize}
+  \item Forward kinematics and Jacobian functions
+  \item Pose error calculations
+  \item Angle representation conversions
+  \item Various matrix operations
+\end{itemize}
+Keeping this part of code in library form allows for easy transfer of these useful functionalities to other packages.
+The motion planners (also referred to as \textit{solvers}) represent different approaches to the problem of solving a given Cartesian trajectory.
+Both the methods presented in \ref{section:task priority}, \ref{section:sqp} are implemented as motion planning libraries.
+
+\subsubsection{Server}
+The computer located on the robot itself or server maintains the control and estimation pipeline on the robot and takes care of publishing the current state and status to the network.
+
+Direct communication with the base and manipulator is achieved through their respective APIs, but in order to connect these libraries to our networked software structure the \verb|ros_control| package is used. 
+It provides a valuable set of tools that abstract the notion of a robot interface and enable quick and easy integration of APIs into ROS-based system architectures.
+
+The transforms representing all of the chains located in the robots URDF\footnote{\textit{Unified Robot Description Format} - Standard file format used for semantic robot descriptions.} file resulting from state estimation are published thorugh the \verb|robot_state_publisher| package. The package publishes the transforms in the form of standardized \verb|\tf| ROS messages.
+The package is launched on the robot's local machine since the standardized structure of the control pipeline relies on the transforms published by this package.
+
+\section{State estimation}\label{section:code state estimation}
+The EKF algorithm described in \ref{section:Localization} is available as a component of the \verb|robot_localization| package \citep{MooreStouchKeneralizedEkf2014}.
+This package fuses odometry estimates provided by various sources, ideally resulting in a higher-accuracy estimate.
+The estimates need to be published to a ROS topic in the form of a \verb|nav_msgs/odometry| message.
+Each state estimation node in \verb|robot_localization| begins estimating the vehicle’s state as soon as it receives a single measurement. If there is a holiday in the sensor data (i.e., a long period in which no data is received), the filter will continue to estimate the robot’s state via an internal motion model.
+
+\section{Motion planning}\label{section:code motion planning}
+Two motion planning algorithm have been developed, one implementing the \textit{task-priority} (\ref{section:task priority}) scheme and the other implementing the scheme in \ref{mnptik_2} cia the SQP (\ref{section:sqp}) algorithm.
+
+Unifying the implementations is a common linear algebra framework, the Eigen3 library\footnote{http://eigen.tuxfamily.org/index.php?title=Main\_ Page}.
+The Eigen3 library is a powerful linear algebra toolbox capable of handling a vast array of dense and sparse matrix calculations.
+It is also templated and heavily optimized for reducing redundant value copying and memory management, making it the basis of many algorithm implementations across a range of fields.
+
+\subsection{Task-priority}
+Unlike the SQP implementations, task-priority is implemented using only the Eigen3 and C++ standard libraries.
+It relies on \textit{singular value filtering} \eqref{eq:svf} and the \textit{selectively damped least squares} \eqref{eq:sdp} formulation to maintain numeric stability in the pseudoinverse operation.
+These functions have been developed from scratch in highly abstracted template form for the purposes of this work and are publicly available\footnote{because of it's compact form it was also included in the appendix}.
+
+\subsection{Sequential convex optimization}
+Implementation of the sequential convex optimization algorithm is done using Google Ceres solver as the underlying convex optimization subprogram.
+The objective and convexified constraint functions are implemented as classes in order to be compatible with the solver.
+Ceres is configured to run using the Levenberg-Marquardt trust-region strategy with the Broyden–Fletcher–Goldfarb–Shanno algorithm being used for performing line search.
+
+\section{Control}\label{section:control}
+The underlying control architecture of the Thing mobile manipulator relies heavily on the internal APIs of both the UR10 and Ridgeback.
+Thus, the main challenge in implementing the software architecture lies integration of control inputs and outputs rather than parametrization of a control loop.
+The \verb|ros_control| package functions as an integration tool for robot APIs into the networked structure of ROS-based systems.
+\begin{figure}\label{fig:ros control}
+\centering
+\includegraphics[width=0.9\textwidth]{ros_control}
+\caption{Scheme of ros\_ control functionalities}
+\end{figure}
+The \verb|hardware_interface| \ref{fig:ros control} class is used to wrap the read and write methods of the respective APIs in to function handles. 
+These handles can then be used by a selection of controllers within the package to either forward commands or implement a control loop.
+A ros controller has many types and is configured using a yaml file. 
+Depending on the interface, this controller will forward commands or actually control the signal using tunable PID parameters.
+Additionally, we use the joint trajectory controllers which can handle and interpolate multiple timed trajectory points.
+
+
+\chapter{Results}
+\section{Simulation}
+\section{Real}
+\begin{figure}[h]
+\centering
+\includegraphics[width=.75\textwidth]{localization1}
+\caption{Simulated localization}
+\end{figure}
+\begin{figure}[h]
+\centering
+\includegraphics[width=.75\textwidth]{thing_odometry_lidar}
+\caption{Simulated localization}
+\end{figure}
+
+
+
+
+
+\chapter{Conclusion}
+Conclusion.
+
+\bibliography{literatura}
+\bibliographystyle{plainnat}
+
+\appendix
+\chapter{DH parameters}
+\begin{table}
+\begin{align}
+\label{DH}
+ \begin{tabular}{|c|c|c|c|c|}
+  \hline
+ Link& $d_i$& $\theta_i$& $a_i$ & $\alpha_i$\\
+\hline
+ 1 & $0$ & $\frac{\pi}{2}$ & $0$& $\frac{\pi}{2}$\\
+  \hline
+ 2 & $q_x$ & $\frac{\pi}{2}$ & $0$& $\frac{\pi}{2}$\\
+  \hline
+ 3 & $q_y$ & $\frac{\pi}{2}$ & $0$& $\frac{\pi}{2}$\\
+  \hline
+ 4 & $0$ &$q_{\theta}$ & 0& 0\\
+  \hline
+ 5 & $0.653$ & $0$ & 0.27& 0\\
+   \hline
+ 6 & $0$ & $\frac{\pi}{2}$ & 0.01& 0\\
+   \hline
+ 7 & $0.1273$ & $q_0$ & 0& $\frac{\pi}{2}$\\
+   \hline
+ 8 & $0$ & $q_1$ & -0.612& 0\\
+   \hline
+ 9 & $0$ & $q_2$ & -0.5723& 0\\
+  \hline
+ 10 & $ 0.163941$ & $q_3$ & 0& $\frac{\pi}{2}$\\
+  \hline
+ 11 & $0.1157$ & $q_4$ & 0& $-\frac{\pi}{2}$\\
+  \hline
+ 12 & $0.0922$ & $q_5$ & 0& 0\\
+  \hline
+ \end{tabular}
+\end{align}
+\caption{Thing's DH parameters}
+\end{table}
+
+\chapter{Robot operating system}\label{sec:def_ROS}
+ROS is an open source software development tool for implementing robotics software. It provides the opportunity of hardware abstraction, low level device control, implementation of commonly used functionalities, messages between different processes and package management. It provide tools and libraries which utilize the the opportunity of communicating between disturbed computers, obtaining, writing and running code.
+
+
+ROS has three different levels of concepts
+
+\begin{itemize}
+\item \textbf{The file system level}
+
+Handles the main unit for a ROS system which is packages. A package may include data sets, ROS dependent libraries, configure files etc. to define a ROS process. In ROS a process is denoted as a node. 
+\item \textbf{The computation graph level}
+
+Handles the communication of the peer to peer network of the system in which data is processed. Through the computation graph level, the different nodes can communicate with each other by messages. When a node is sending data it is said to be publishing a topic. The different nodes can then subscribe to this topic to get the information that is published.
+\item \textbf{The Community level}
+
+ROS has a huge community which contain distribution of software installations, repositories and documentation of ROS. It also has a question and answer section with ROS related topics.\\
+This community makes the process of learning the system considerably easier.
+\end{itemize}
+\begin{abstract}
+Abstract.
+
+\keywords{Keywords.}
+\end{abstract}
+
+% TODO: Navedite naslov na hrvatskom jeziku.
+\hrtitle{Naslov}
+\begin{sazetak}
+Sažetak na hrvatskom jeziku.
+
+\kljucnerijeci{Ključne riječi, odvojene zarezima.}
+\end{sazetak}
+
+\end{document}
