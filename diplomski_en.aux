@@ -29,8 +29,8 @@
 \@writefile{lof}{\contentsline {figure}{\numberline {2.3}{\ignorespaces The UR10 manipulator\relax }}{5}}
 \newlabel{fig:ur10}{{2.3}{5}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {2.2.1}FT300}{6}}
-\@writefile{lof}{\contentsline {figure}{\numberline {2.4}{\ignorespaces The UR10 manipulator\relax }}{6}}
-\newlabel{fig:ur10}{{2.4}{6}}
+\@writefile{lof}{\contentsline {figure}{\numberline {2.4}{\ignorespaces The FT300 force-torque sensor\relax }}{6}}
+\newlabel{fig:FT300}{{2.4}{6}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {2.2.2}Robotiq Gripper}{6}}
 \@writefile{lof}{\contentsline {figure}{\numberline {2.5}{\ignorespaces The Robotiq gripper\relax }}{6}}
 \citation{thrun2005probabilistic}
@@ -39,138 +39,146 @@
 \@writefile{lot}{\addvspace {10\p@ }}
 \@writefile{loa}{\addvspace {10\p@ }}
 \newlabel{chapter:State estimation}{{3}{7}}
-\newlabel{state_space_nl}{{3.1}{7}}
+\newlabel{eq:state_space_nl}{{3.1}{7}}
 \@writefile{lof}{\contentsline {figure}{\numberline {3.1}{\ignorespaces The Thing mobile manipulator and the frames subject to estimation\relax }}{7}}
+\newlabel{figure:thing states}{{3.1}{7}}
 \@writefile{toc}{\contentsline {section}{\numberline {3.1}State}{8}}
 \newlabel{section:State}{{3.1}{8}}
 \newlabel{transform}{{3.2}{8}}
 \newlabel{eq:pose}{{3.3}{8}}
+\newlabel{eq:pose base}{{3.4}{8}}
 \newlabel{eq:task_vector}{{3.5}{8}}
+\citation{uicker1964iterative}
 \@writefile{toc}{\contentsline {section}{\numberline {3.2}Kinematic model}{9}}
 \newlabel{section:Kinematics}{{3.2}{9}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {3.2.1}Forward kinematics}{9}}
 \newlabel{subsection:FK}{{3.2.1}{9}}
 \newlabel{eq:config_matrix}{{3.6}{9}}
 \newlabel{homogenous}{{3.7}{9}}
-\newlabel{FK}{{3.8}{9}}
+\newlabel{FK}{{3.8}{10}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {3.2.2}Differential forward kinematics}{10}}
 \newlabel{eq:jacobian}{{3.9}{10}}
 \newlabel{eq:jacobian_identity}{{3.10}{10}}
 \newlabel{eq:jacobian_estimate}{{3.11}{10}}
 \@writefile{toc}{\contentsline {subsubsection}{End-effector Jacobian}{10}}
-\newlabel{jacob1}{{3.12}{10}}
-\@writefile{loa}{\contentsline {algocf}{\numberline {1}{\ignorespaces Geometric Jacobian calculation\relax }}{11}}
-\newlabel{algorithm:jacobian calc}{{1}{11}}
+\citation{sciavicco2012modelling}
+\newlabel{jacob1}{{3.12}{11}}
 \newlabel{eq:pose_diff}{{3.16}{11}}
-\newlabel{eq:pose difference}{{3.18}{12}}
-\@writefile{toc}{\contentsline {section}{\numberline {3.3}Localization}{12}}
-\newlabel{section:Localization}{{3.3}{12}}
+\newlabel{eq:pose difference}{{3.18}{11}}
+\@writefile{toc}{\contentsline {section}{\numberline {3.3}Localization}{11}}
+\newlabel{section:Localization}{{3.3}{11}}
+\@writefile{loa}{\contentsline {algocf}{\numberline {1}{\ignorespaces Geometric Jacobian calculation\relax }}{12}}
+\newlabel{algorithm:jacobian calc}{{1}{12}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {3.3.1}Wheel odometry}{12}}
-\newlabel{eq:wheel_sigma}{{3.21}{12}}
 \citation{MooreStouchKeneralizedEkf2014}
+\newlabel{eq:base vel estimate}{{3.20}{13}}
+\newlabel{eq:wheel_sigma}{{3.21}{13}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {3.3.2}LIDAR odometry}{13}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {3.3.3}Extended Kalman filter}{13}}
 \newlabel{state_space_nl2}{{3.23}{13}}
 \newlabel{eq:nl_forcast}{{3.24}{13}}
 \newlabel{eq:nl_correction}{{3.25}{13}}
-\@writefile{toc}{\contentsline {chapter}{\numberline {4}Motion planning}{14}}
+\@writefile{toc}{\contentsline {chapter}{\numberline {4}Motion planning}{15}}
 \@writefile{lof}{\addvspace {10\p@ }}
 \@writefile{lot}{\addvspace {10\p@ }}
 \@writefile{loa}{\addvspace {10\p@ }}
-\newlabel{chapter:motion planning}{{4}{14}}
-\@writefile{toc}{\contentsline {section}{\numberline {4.1}Inverse kinematics}{14}}
-\newlabel{section:inverse kinematics}{{4.1}{14}}
+\newlabel{chapter:motion planning}{{4}{15}}
+\@writefile{toc}{\contentsline {section}{\numberline {4.1}Inverse kinematics}{15}}
+\newlabel{section:inverse kinematics}{{4.1}{15}}
+\newlabel{eq:inverse}{{4.2}{15}}
 \citation{chan1988general}
 \citation{chiaverini1994review}
 \citation{buss2005selectively}
 \citation{colome2015closed}
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.1.1}Differential inverse kinematics}{15}}
-\newlabel{diffik_1}{{4.3}{15}}
-\newlabel{diffik_2}{{4.4}{15}}
-\newlabel{diffik_4}{{4.5}{15}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.1.2}The Jacobian pseudoinverse and numerical filtering}{15}}
-\@writefile{toc}{\contentsline {subsubsection}{Damped psudoinverse}{15}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.1.1}Differential inverse kinematics}{16}}
+\newlabel{diffik_1}{{4.3}{16}}
+\newlabel{diffik_2}{{4.4}{16}}
+\newlabel{diffik_4}{{4.5}{16}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.1.2}The Jacobian pseudoinverse and numerical filtering}{16}}
+\@writefile{toc}{\contentsline {subsubsection}{Damped psudoinverse}{16}}
 \citation{buss2005selectively}
 \citation{colome2012redundant}
-\@writefile{toc}{\contentsline {subsubsection}{Selectively damped pseudoinverse}{16}}
-\newlabel{eq:sdp}{{4.11}{16}}
-\@writefile{toc}{\contentsline {subsubsection}{Singular value filtering}{16}}
-\newlabel{eq:svf}{{4.12}{16}}
-\newlabel{eq:svf jacobian}{{4.13}{16}}
-\@writefile{toc}{\contentsline {section}{\numberline {4.2}Redundancy resolution}{16}}
-\newlabel{section:redundancy resolution}{{4.2}{16}}
-\newlabel{diffik_3}{{4.14}{16}}
+\@writefile{toc}{\contentsline {subsubsection}{Selectively damped pseudoinverse}{17}}
+\newlabel{eq:sdp}{{4.11}{17}}
+\@writefile{toc}{\contentsline {subsubsection}{Singular value filtering}{17}}
+\newlabel{eq:svf}{{4.12}{17}}
+\newlabel{eq:svf jacobian}{{4.13}{17}}
+\@writefile{toc}{\contentsline {section}{\numberline {4.2}Redundancy resolution}{17}}
+\newlabel{section:redundancy resolution}{{4.2}{17}}
+\newlabel{diffik_3}{{4.14}{17}}
 \citation{nakamura1987task,nakamura1990advanced}
 \citation{slotine1991general}
 \citation{baillieul1985kinematic}
 \citation{chiaverini1997singularity}
 \citation{moe2016set}
-\newlabel{rresolution_0}{{4.15}{17}}
-\@writefile{toc}{\contentsline {section}{\numberline {4.3}Task-prioity kinematics}{17}}
-\newlabel{section:task priority}{{4.3}{17}}
-\newlabel{rresolution_1}{{4.16a}{17}}
-\newlabel{rresolution_2}{{4.17}{17}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.3.1}Motion planning scheme}{17}}
-\newlabel{rresolution_3}{{4.18}{17}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.3.2}Drawbacks}{18}}
-\newlabel{subsec:tp drawbacks}{{4.3.2}{18}}
-\@writefile{toc}{\contentsline {section}{\numberline {4.4}Sequential convex optimization}{18}}
-\newlabel{section:sqp}{{4.4}{18}}
-\newlabel{optik_1}{{4.19}{18}}
-\newlabel{optik_2}{{4.20}{18}}
-\newlabel{optik_3}{{4.21}{18}}
-\newlabel{optik_4}{{4.22}{18}}
-\newlabel{optik_5}{{4.23}{18}}
-\newlabel{optik_6}{{4.24}{19}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.4.1}Modeling objective and constraint functions}{19}}
-\@writefile{toc}{\contentsline {subsubsection}{Minimizing state change}{19}}
-\newlabel{optik_7}{{4.25}{19}}
-\@writefile{toc}{\contentsline {subsubsection}{Pose control}{19}}
-\newlabel{eq:optik_8_aux}{{4.26}{19}}
-\newlabel{eq:optik_8}{{4.27}{19}}
-\@writefile{toc}{\contentsline {subsubsection}{Obstacle avoidance}{20}}
-\@writefile{toc}{\contentsline {subsubsection}{Manipulability maximization}{20}}
-\newlabel{eq:condition number}{{4.32}{20}}
-\newlabel{mnptik_1}{{4.33}{20}}
+\newlabel{rresolution_0}{{4.15}{18}}
+\@writefile{toc}{\contentsline {section}{\numberline {4.3}Task-prioity kinematics}{18}}
+\newlabel{section:task priority}{{4.3}{18}}
+\newlabel{rresolution_1}{{4.16a}{18}}
+\newlabel{rresolution_2}{{4.17}{18}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.3.1}Motion planning scheme}{18}}
+\newlabel{rresolution_3}{{4.18}{18}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.3.2}Drawbacks}{19}}
+\newlabel{subsec:tp drawbacks}{{4.3.2}{19}}
+\@writefile{toc}{\contentsline {section}{\numberline {4.4}Sequential convex optimization}{19}}
+\newlabel{section:sqp}{{4.4}{19}}
+\newlabel{optik_1}{{4.19}{19}}
+\newlabel{optik_2}{{4.20}{19}}
+\newlabel{optik_3}{{4.21}{19}}
+\newlabel{optik_4}{{4.22}{19}}
+\newlabel{optik_5}{{4.23}{19}}
+\newlabel{optik_6}{{4.24}{20}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.4.1}Modeling objective and constraint functions}{20}}
+\@writefile{toc}{\contentsline {subsubsection}{Minimizing state change}{20}}
+\newlabel{optik_7}{{4.25}{20}}
+\@writefile{toc}{\contentsline {subsubsection}{Pose control}{20}}
+\newlabel{eq:optik_8_aux}{{4.26}{20}}
+\newlabel{eq:optik_8}{{4.27}{20}}
+\@writefile{toc}{\contentsline {subsubsection}{Obstacle avoidance}{21}}
+\@writefile{toc}{\contentsline {subsubsection}{Manipulability maximization}{21}}
+\newlabel{eq:condition number}{{4.32}{21}}
+\newlabel{mnptik_1}{{4.33}{21}}
 \citation{schulman2013finding,xu2010two}
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.4.2}Motion planning scheme}{21}}
-\newlabel{mnptik_2}{{4.34}{21}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.4.3}The SQP algorithm}{21}}
-\@writefile{loa}{\contentsline {algocf}{\numberline {2}{\ignorespaces The SQP algorithm\relax }}{22}}
-\newlabel{algorithm:sqp}{{2}{22}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.4.2}Motion planning scheme}{22}}
+\newlabel{mnptik_2}{{4.34}{22}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.4.3}The SQP algorithm}{22}}
+\@writefile{loa}{\contentsline {algocf}{\numberline {2}{\ignorespaces The SQP algorithm\relax }}{23}}
+\newlabel{algorithm:sqp}{{2}{23}}
 \gincltex@bb{slike/software_tikz.tex}{0}{0}{443.24109}{388.82382}
-\@writefile{toc}{\contentsline {chapter}{\numberline {5}Software architecture}{23}}
+\@writefile{toc}{\contentsline {chapter}{\numberline {5}Software architecture}{24}}
 \@writefile{lof}{\addvspace {10\p@ }}
 \@writefile{lot}{\addvspace {10\p@ }}
 \@writefile{loa}{\addvspace {10\p@ }}
-\@writefile{toc}{\contentsline {section}{\numberline {5.1}Overview}{23}}
-\newlabel{section:overview}{{5.1}{23}}
-\@writefile{lof}{\contentsline {figure}{\numberline {5.1}{\ignorespaces Overview of the software architecture. White rounded rectangles represent ROS packages, while cross-hatched rectangles represent individual libraries/headers/executables.\relax }}{24}}
-\newlabel{fig:overview}{{5.1}{24}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {5.1.1}Architecture}{24}}
-\@writefile{toc}{\contentsline {subsubsection}{Client}{24}}
+\@writefile{toc}{\contentsline {section}{\numberline {5.1}Overview}{24}}
+\newlabel{section:overview}{{5.1}{24}}
+\@writefile{lof}{\contentsline {figure}{\numberline {5.1}{\ignorespaces Overview of the software architecture. White rounded rectangles represent ROS packages, while cross-hatched rectangles represent individual libraries/headers/executables.\relax }}{25}}
+\newlabel{fig:overview}{{5.1}{25}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.1.1}Architecture}{25}}
+\@writefile{toc}{\contentsline {subsubsection}{Client}{25}}
 \citation{MooreStouchKeneralizedEkf2014}
-\@writefile{toc}{\contentsline {subsubsection}{Server}{25}}
-\@writefile{toc}{\contentsline {section}{\numberline {5.2}State estimation}{26}}
-\newlabel{section:code state estimation}{{5.2}{26}}
-\@writefile{toc}{\contentsline {section}{\numberline {5.3}Motion planning}{26}}
-\newlabel{section:code motion planning}{{5.3}{26}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {5.3.1}Task-priority}{26}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {5.3.2}Sequential convex optimization}{26}}
-\newlabel{fig:ros control}{{\caption@xref {fig:ros control}{ on input line 922}}{27}}
-\@writefile{lof}{\contentsline {figure}{\numberline {5.2}{\ignorespaces Scheme of ros\_ control functionalities\relax }}{27}}
-\@writefile{toc}{\contentsline {section}{\numberline {5.4}Control}{27}}
-\newlabel{section:control}{{5.4}{27}}
-\@writefile{toc}{\contentsline {chapter}{\numberline {6}Results}{28}}
+\@writefile{toc}{\contentsline {subsubsection}{Server}{26}}
+\@writefile{toc}{\contentsline {section}{\numberline {5.2}State estimation}{27}}
+\newlabel{section:code state estimation}{{5.2}{27}}
+\@writefile{toc}{\contentsline {section}{\numberline {5.3}Motion planning}{27}}
+\newlabel{section:code motion planning}{{5.3}{27}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.3.1}Task-priority}{27}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.3.2}Sequential convex optimization}{27}}
+\newlabel{fig:ros control}{{\caption@xref {fig:ros control}{ on input line 922}}{28}}
+\@writefile{lof}{\contentsline {figure}{\numberline {5.2}{\ignorespaces Scheme of ros\_ control functionalities\relax }}{28}}
+\@writefile{toc}{\contentsline {section}{\numberline {5.4}Control}{28}}
+\newlabel{section:control}{{5.4}{28}}
+\@writefile{toc}{\contentsline {chapter}{\numberline {6}Results}{29}}
 \@writefile{lof}{\addvspace {10\p@ }}
 \@writefile{lot}{\addvspace {10\p@ }}
 \@writefile{loa}{\addvspace {10\p@ }}
-\@writefile{toc}{\contentsline {section}{\numberline {6.1}Simulation}{28}}
-\@writefile{toc}{\contentsline {section}{\numberline {6.2}Real}{28}}
-\@writefile{lof}{\contentsline {figure}{\numberline {6.1}{\ignorespaces Simulated localization\relax }}{28}}
-\@writefile{lof}{\contentsline {figure}{\numberline {6.2}{\ignorespaces Simulated localization\relax }}{29}}
+\@writefile{toc}{\contentsline {section}{\numberline {6.1}Simulation}{29}}
+\@writefile{lof}{\contentsline {figure}{\numberline {6.1}{\ignorespaces The Thing manipulator in a simulated Gazebo environment.\relax }}{29}}
+\@writefile{toc}{\contentsline {section}{\numberline {6.2}Real}{30}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.2.1}Localization results}{30}}
+\@writefile{lof}{\contentsline {figure}{\numberline {6.2}{\ignorespaces Localization test setup\relax }}{30}}
+\@writefile{lof}{\contentsline {figure}{\numberline {6.3}{\ignorespaces Simulated localization\relax }}{30}}
 \bibdata{literatura}
-\@writefile{toc}{\contentsline {chapter}{\numberline {7}Conclusion}{30}}
+\@writefile{toc}{\contentsline {chapter}{\numberline {7}Conclusion}{31}}
 \@writefile{lof}{\addvspace {10\p@ }}
 \@writefile{lot}{\addvspace {10\p@ }}
 \@writefile{loa}{\addvspace {10\p@ }}
@@ -184,27 +192,28 @@
 \bibcite{colome2015closed}{{8}{2015}{{Colom{\'e} and Torras}}{{}}}
 \bibcite{korayem2004analysis}{{9}{2004}{{Korayem and Ghariblu}}{{}}}
 \bibcite{korayem2012mathematical}{{10}{2012}{{Korayem et~al.}}{{Korayem, Rahimi, and Nikoobin}}}
-\@writefile{toc}{\contentsline {chapter}{Bibliography}{31}}
-\bibcite{leshin2013volatile}{{11}{2013}{{Leshin et~al.}}{{Leshin, Mahaffy, Webster, Cabane, Coll, Conrad, Archer, Atreya, Brunner, Buch, et~al.}}}
-\bibcite{moe2016set}{{12}{2016}{{Moe et~al.}}{{Moe, Antonelli, Teel, Pettersen, and Schrimpf}}}
-\bibcite{MooreStouchKeneralizedEkf2014}{{13}{2014}{{Moore and Stouch}}{{}}}
-\bibcite{nakamura1990advanced}{{14}{1990}{{Nakamura}}{{}}}
-\bibcite{nakamura1987task}{{15}{1987}{{Nakamura et~al.}}{{Nakamura, Hanafusa, and Yoshikawa}}}
-\bibcite{papadopoulos1999framework}{{16}{1999}{{Papadopoulos and Gonthier}}{{}}}
-\bibcite{schulman2013finding}{{17}{2013}{{Schulman et~al.}}{{Schulman, Ho, Lee, Awwal, Bradlow, and Abbeel}}}
+\@writefile{toc}{\contentsline {chapter}{Bibliography}{32}}
+\bibcite{moe2016set}{{11}{2016}{{Moe et~al.}}{{Moe, Antonelli, Teel, Pettersen, and Schrimpf}}}
+\bibcite{MooreStouchKeneralizedEkf2014}{{12}{2014}{{Moore and Stouch}}{{}}}
+\bibcite{nakamura1990advanced}{{13}{1990}{{Nakamura}}{{}}}
+\bibcite{nakamura1987task}{{14}{1987}{{Nakamura et~al.}}{{Nakamura, Hanafusa, and Yoshikawa}}}
+\bibcite{papadopoulos1999framework}{{15}{1999}{{Papadopoulos and Gonthier}}{{}}}
+\bibcite{schulman2013finding}{{16}{2013}{{Schulman et~al.}}{{Schulman, Ho, Lee, Awwal, Bradlow, and Abbeel}}}
+\bibcite{sciavicco2012modelling}{{17}{2012}{{Sciavicco and Siciliano}}{{}}}
 \bibcite{slotine1991general}{{18}{1991}{{Slotine}}{{}}}
 \bibcite{thrun2005probabilistic}{{19}{2005}{{Thrun et~al.}}{{Thrun, Burgard, and Fox}}}
-\bibcite{xu2010two}{{20}{2010}{{Xu et~al.}}{{Xu, Wang, and Sun}}}
-\bibcite{yamamoto1992coordinating}{{21}{1992}{{Yamamoto and Yun}}{{}}}
+\bibcite{uicker1964iterative}{{20}{1964}{{Uicker et~al.}}{{Uicker, Denavit, and Hartenberg}}}
+\bibcite{xu2010two}{{21}{2010}{{Xu et~al.}}{{Xu, Wang, and Sun}}}
+\bibcite{yamamoto1992coordinating}{{22}{1992}{{Yamamoto and Yun}}{{}}}
 \bibstyle{plainnat}
-\@writefile{toc}{\contentsline {chapter}{\numberline {A}DH parameters}{34}}
+\@writefile{toc}{\contentsline {chapter}{\numberline {A}DH parameters}{35}}
 \@writefile{lof}{\addvspace {10\p@ }}
 \@writefile{lot}{\addvspace {10\p@ }}
 \@writefile{loa}{\addvspace {10\p@ }}
-\newlabel{DH}{{A.1}{35}}
-\@writefile{lot}{\contentsline {table}{\numberline {A.1}{\ignorespaces Thing's DH parameters\relax }}{35}}
-\@writefile{toc}{\contentsline {chapter}{\numberline {B}Robot operating system}{36}}
+\newlabel{DH}{{A.1}{36}}
+\@writefile{lot}{\contentsline {table}{\numberline {A.1}{\ignorespaces Thing's DH parameters\relax }}{36}}
+\@writefile{toc}{\contentsline {chapter}{\numberline {B}Robot operating system}{37}}
 \@writefile{lof}{\addvspace {10\p@ }}
 \@writefile{lot}{\addvspace {10\p@ }}
 \@writefile{loa}{\addvspace {10\p@ }}
-\newlabel{sec:def_ROS}{{B}{36}}
+\newlabel{sec:def_ROS}{{B}{37}}

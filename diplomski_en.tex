@@ -45,7 +45,7 @@ A comprehensive survey on mobile manipulator systems can be found in \citep{bloc
 
 The mobile manipulator can be described as a robotic system composed of a manipulator arm mounted on top of a mobile platform.
 A variety of issues related to mobile manipulators have been explored in the past two decades. 
-These include dynamic and static stability, force development and application, maximum payload determination, etc \citep{papadopoulos1999framework,korayem2004analysis}.
+These include dynamic and static stability, force development and application, maximum payload determination, etc. \citep{papadopoulos1999framework,korayem2004analysis}.
 However, a majority of the research concerning mobile manipulators deals with motion planning and state estimation \citep{yamamoto1992coordinating,korayem2012mathematical}.
  
 This thesis explores the problems of state estimation and motion planning in the context of an omni-directional mobile manipulator.
@@ -187,7 +187,7 @@ It-s application range from impedance control to perception and contact calibrat
         \caption{Side}
         %\label{fig:gull}
     \end{subfigure}
-    \caption{The UR10 manipulator}\label{fig:ur10}
+    \caption{The FT300 force-torque sensor}\label{fig:FT300}
 \end{figure*}
 
 \subsection{Robotiq Gripper}
@@ -202,63 +202,65 @@ All the fingers can be independently position,velocity and force controlled and 
 
 
 \chapter{State estimation}\label{chapter:State estimation}
-State estimation is one of the most often encountered problems when dealing with autonomous systems, as most algorithms require accurate information on the current state of the system.
-This type of system can be represented using non-linear system described by a difference equation and observation model with additive noise \footnote{we leave out separate expressions for input variables as they can be included within the functions $f$ and $h$}
-\begin{subequations}\label{state_space_nl}
+State estimation is an often encountered challenge when working with autonomous systems.
+Most autonomy schemes require accurate information on the current state of the system in order properly modify the system behaviour.
+This type of system can be generalized as a non-linear system described by a difference equation and observation model with additive noise \footnote{we leave out separate expressions for input variables as they can be integrated within the functions $f$ and $h$}
+\begin{subequations}\label{eq:state_space_nl}
 \begin{gather}
 x_k = f\left(x_{k-1}\right) + w_{k-1} , \ x \in \mathbb{R}^n \\
 z_k = h\left(x_k\right) + v_k, \ z \in \mathbb{R}^k
 \end{gather}
 \end{subequations}
-We define the estimation problem as finding the state estimate $\hat{x}_k$ given the measurements $z_0 \dots z_k$ subject to measurement noise $v$ and past states $x_0 \dots x_{k-1}$ subject to process noise $w$.
-Various algorithms have been developed that use different mathematical frameworks to find the best estimate according to some optimality criterion (\cite{thrun2005probabilistic}). %% TODO REFERENCES  
+Finding the state estimate $\hat{x}_k$ given the measurements $z_0 \dots z_k$ subject to measurement noise $v$ and past states $x_0 \dots x_{k-1}$ subject to process noise $w$ is the state estimation problem.
+Various algorithms have been developed using different mathematical frameworks to find the best estimate according to some optimality criterion (\cite{thrun2005probabilistic}).  
 \begin{figure}[h]
 \centering
 \includegraphics[scale=0.4]{Thingtr}
 \caption{The Thing mobile manipulator and the frames subject to estimation}
+\label{figure:thing states}
 \end{figure}
 
-The problem of state estimation for a mobile manipulator is twofold: it is necessary to estimate the pose of the end-effector in the frame of the mobile base while also localizing the mobile base itself in the workspace.
-The pose of the end-effector in the base frame is estimated using a kinematic model.
-Joint position values are used to provide a pose estimate, ignoring various dynamic and environment effects.
+The problem of state estimation for a mobile manipulator is twofold: it is necessary to estimate the state of the end-effector in the local workspace while also placing it in the global context of a map or starting position.
+The local state of the end-effector is successfully estimated using a deterministic kinematic model.
+Joint position values are used to provide a state estimate, ignoring various dynamic and environment effects.
 Estimating the base state (\textit{localization}) is a more complex problem; the dynamic and environment effects on base movement significantly affect the steady-state.
 Consequently, in addition to kinematic models we have to rely on movement estimates from sensor data which is inherently noisy.
 The imperfect model and sensor data are fused in a single estimate using a probabilistic framework.
 
-In this chapter, we first define our state vector of interest in section \ref{section:State}. 
-Section \ref{section:Kinematics} contains details on the derivation of the kinematic model used in end-effector pose estimation assuming sufficient knowledge of the base pose. 
-The probabilistic framework used for estimating the base pose is described in section \ref{section:Localization}, where wheel and LIDAR odometry are fused to provide an accurate estimate.
-The focus of this chapter is estimating the pose of the end-effector and mobile base, but the methods are extendable to any frame on the platform.
+In this chapter, we first define our state of interest (as seen in Fig~\ref{figure:thing states}) in section \ref{section:State}. 
+Section~\ref{section:Kinematics} contains details on the derivation of the kinematic model used in end-effector state estimation assuming sufficient knowledge of the base pose. 
+The probabilistic framework used for estimating the base state is described in section \ref{section:Localization}, where wheel and LIDAR odometry are fused to provide an accurate estimate.
+%The focus of this chapter is estimating the pose of the end-effector and mobile base, but the methods are extendable to any frame on the platform.
 
 \section{State}\label{section:State}
-Most high-level control and task algorithms require information on the pose of the mobile manipulator frames in Cartesian space. 
-A frame pose represents complete informations about a frames position and orientation in a given reference frame.
-The pose is often represented by a \textit{homogenous transformation matrix} $T$
+Control and task algorithms frequently require information on the pose of the mobile manipulator frames in Cartesian space. 
+A frame pose represents complete information about a frames position and orientation in a given reference frame.
+The pose is often represented by a \textit{homogenous transformation matrix}
 \begin{align}
-T =
+T_{k-1}^k =
 \begin{bmatrix}
 R & p\\
 0 & 1\\
-\end{bmatrix}
+\end{bmatrix}\,.
 \label{transform}
 \end{align}
-The rotation matrix $R \in \mathbb{R}^{3x3}$ represents the orientation of the tool frame $t$ as seen in the global frame $0$, while translation is represented by the vector $p \in \mathbb{R}^3$.
+The rotation matrix $R \in \mathbb{R}^{3x3}$ represents the orientation of the frame $k$ relative to the frame $k-1 $, while translation is represented by the vector $p \in \mathbb{R}^3$.
 Estimating the matrix $T$ for the end-effector is a 9-dimensional problem which can be further reduced. 
 It is possible to fully define it the vector $r$ consisting of the translation vector $p$ and a \textit{quaternion} $q$
 \begin{align} \label{eq:pose}
 r_{EE}\left(T_{0}^{EE}\right) = 
 \begin{bmatrix}
 x& y& z& q_w& q_x& q_y& q_z
-\end{bmatrix}^T
+\end{bmatrix}^T\, .
 \end{align}
-We can reduce this even further for the mobile base, as it moves on a 2D plane and thus only rotates alongside one axis and has a constant $z$ coordinate
-\begin{align}
+The number of dimensions can also be reduced for the base, as it moves on a 2D plane and thus only rotates alongside one axis and has a constant $z$ coordinate
+\begin{align}\label{eq:pose base}
 r_{B}\left(T_{0}^{B}\right) = 
 \begin{bmatrix}
-x& y& \theta
-\end{bmatrix}^T
+\hat{x}& \hat{y}& \hat{\theta}
+\end{bmatrix}^T\, .
 \end{align}
-Our estimated state consists of end-effector and base poses comes in the form of a 10-dimensional \textit{task vector} $s$
+The estimated state consists of end-effector and base poses comes in the form of a 10-dimensional \textit{task vector} $s$
 \begin{align}\label{eq:task_vector}
 s = 
 \begin{bmatrix}
@@ -267,16 +269,19 @@ r_{EE}& r_B
 \end{align}
 Using this representation, the state estimation problem has been reduced from 24 down to 10 dimensions.
 Reducing the dimensionality of the problem makes it computationally less expensive, which is vital for real-time operation.
+Considering that the global state estimate in this work is derived exclusively from base odometry data, it is possible to infer the base pose knowing the end-effector pose.
+However, to maintain generality the formulation in \eqref{eq:pose} and \eqref{eq:pose base} is kept.
 
 \section{Kinematic model}\label{section:Kinematics}
-If we disregard the various dynamic and environment effects, the Thing can be modelled as a manipulator.
+Disregarding the various dynamic and environment effects, the Thing can be modelled as manipulator.
 The Ridgeback platform is system with holonomic constraints and it's global position and the orientation can be viewed as a chain of two prismatic and a rotational joint. 
-These three joints make up the base upon which we add the kinematic model of the UR10 manipulator, which results in a system kinematically indistinguishable from a redundant manipulator.
+These three joints make up the base upon which we add the kinematic model of the UR10 manipulator.
+This results in a system kinematically indistinguishable from a redundant manipulator.
 
-The UR10 joint position measurements are reasonably accurate and thus this model can be used to produce a valid state estimate of the local end-effector pose.
-Assuming valid estimates for the base position and orientation, this model will accurately represent the true state of the mobile manipulator.
+The UR10 joint position measurements are reasonably accurate and thus this model can be used to produce a valid local end-effector state estimate.
+Assuming valid estimates for the base position and orientation, this model will accurately represent the global state of the mobile manipulator.
 \subsection{Forward kinematics}\label{subsection:FK}
-We define forward kinematics as a set of equations that express the pose of a certain frame on a kinematic chain as a function of configuration-space values $q$
+Forward kinematics are defined as a set of equations that express the pose of a certain frame on a kinematic chain as a function of configuration-space values
 \begin{align}\label{eq:config_matrix}
 q = 
 \begin{bmatrix}
@@ -284,7 +289,7 @@ q_0& q_1& q_2& q_3& q_4& q_5& \hat{x}& \hat{y}& \hat{\theta}
 \end{bmatrix}^T \quad .
 \end{align}
 The equations are commonly derived using the transforms defined in \eqref{transform}.
-The transform between two frames can be defined as a function of only four parameters using the Denavit-Hartenberg notation.
+The transform between two frames can be defined as a function of only four parameters using the Denavit-Hartenberg notation \citep{uicker1964iterative}.
 \begin{align}
 T_{k-1}^k(d, \ \theta, \ a, \ \alpha)
 =
@@ -304,16 +309,17 @@ T_{0}^{EE} = \prod_{k=1}^{N_{EE}} T_{k-1}^{k} \quad .
 \label{FK}
 \end{equation}
 The forward kinematics model is subject to various joint angle and link length biases, as it is possible the given DH parameters do not exactly correspond to the physical manipulator.
-However the estimate provided is still has an error significantly lower than the error resulting from base localization and thus can be disregarded in the current analysis.
+However, the estimate provided has a significantly lower error than that of base localization and thus can be disregarded in the current analysis.
 
-It is also interesting to note that the forward kinematics equations are non-injective surjective functions. 
-Every $q$ corresponds to only one pose $T$, even though a given $T$ might correspond to multiple values of $q$.
+It is also interesting to note that the forward kinematics equations are non-injective surjective functions: 
+every $q$ corresponds to a single pose $T$, even though a given $T$ might correspond to multiple or infinite values of $q$.
 The analytic formulation of the transform from the global frame to the end-effector can be found in the appendix.
+
 \subsection{Differential forward kinematics}
-Equations defined in \ref{subsection:FK} provide an estimate of the end-effector and base pose using the configuration vector $q$. 
-However, algorithms used in motion planning and trajectory optimization require information on how configuration change affects the pose.
+Equations defined in \ref{subsection:FK} provide an estimate of the mobile manipulator state \eqref{eq:task_vector} using the configuration vector $q$. 
+However, algorithms used in motion planning and trajectory optimization require an estimate on how configuration change affects the state.
 This information is contained within the manipulator Jacobian $J$.
-We define the Jacobian $J$ as the derivative of the function $f\left(x\right) \ : \mathbb{R}^n \rightarrow \mathbb{R}^k $ with respect to the vector $z$.
+We define the Jacobian $J$ as the derivative of the function $f\left(x\right) \ : \mathbb{R}^n \rightarrow \mathbb{R}^k $ with respect to the vector $x$.
 \begin{align}\label{eq:jacobian}
 J =
 \begin{bmatrix}
@@ -332,9 +338,11 @@ For a sufficiently small $\Delta$, equation \ref{eq:jacobian_identity} can be ex
 \hat{f}_k = f_{k-1} + J\left(x_{k} - x_{k-1}\right)
 \end{align}
 This framework can be employed in various state estimation and motion planning algorithms.
+
 \subsubsection{End-effector Jacobian}
+For motion planning applications, an estimate on how configuration change affects the end-effector pose $\Delta r_{EE}$ is vital.
 The end-effector Jacobian is defined as the derivative of the end-effector pose \ref{eq:pose} with respect to the configuration vector $q$.
-While it can be derived analytically, it is often simpler to derive it using the geometry of the chain.
+While it can be derived analytically, it is often advantageous to derive it using the geometry of the chain.
 Here the Jacobian takes the form 
 \begin{equation}
 J =
@@ -378,9 +386,8 @@ As seen in Algorithm~\ref{algorithm:jacobian calc}, the geometric derivation is 
  \caption{Geometric Jacobian calculation}
  \label{algorithm:jacobian calc}
 \end{algorithm}
-
 The \textit{twist} vector $w$ is defined as the composition of translational and rotational velocities.
-For small enough pose difference $\Delta r$, the vectors are approximately equal
+For a sufficiently small pose difference $\Delta r$, the vectors are approximately equal
 \begin{align}\label{eq:pose_diff}
 w  = 
 \begin{bmatrix} 
@@ -396,23 +403,24 @@ v \\ \omega
 \end{align}
 Calculating the position difference is straightforward and comes down to subtracting the goal and current positions
 \begin{align}
-\Delta p = p - p_{goal} 
+\Delta p = p - p_{goal}\, .
 \end{align}
-The orientation difference is calculated as follows (detailed derivation in appendix)
+The orientation difference is calculated as follows \citep{sciavicco2012modelling}
 \begin{subequations}\label{eq:pose difference}
 \begin{gather}
-\Delta o = 0.5 L^{-1} \left( n_c\times n_d + s_c\times s_d + a_c\times a_d \right) \\
+\Delta o = 0.5 L^{-1} \left( n_c\times n_d + s_c\times s_d + a_c\times a_d \right)\, , \\
 L = - 0.5 \left(\left[n_c\right]_{\times}\left[n_d\right]_{\times} + \left[s_c\right]_{\times}\left[s_d\right]_{\times} 
-+ \left[a_c\right]_{\times}\left[a_d\right]_{\times} \right)
++ \left[a_c\right]_{\times}\left[a_d\right]_{\times} \right)\, .
 \end{gather}
 \end{subequations}
+Plainly stated, this is the equivalent of angular velocity defined by two different orientations.
 \section{Localization}\label{section:Localization}
-When considering the kinematic model sufficiently accurate base pose estimates $x,y,\theta$ are assumed.
+When using the kinematic model in \ref{section:Kinematics} sufficiently accurate base pose estimates $\hat{x},\hat{y},\hat{\theta}$ are assumed.
 In reality, obtaining accurate pose estimates is non-trivial and often requires fusing sensor data while taking in to account the probabilistic nature of measurements.
 
 Localization of the Thing mobile manipulator employs a motion model of the omni-directional drive on the Ridgeback and data provided by the LIDAR.
 The wheel and LIDAR odometry provide Cartesian velocity estimates with covariance data.
-This data is fused using an extended Kalman filter and the resulting estimate is more accurate than simply integrating odometry data.
+This data is fused using an extended Kalman filter and the resulting estimate is more accurate (in theory) than simply integrating wheel odometry data.
 \subsection{Wheel odometry}
 In classical mechanics a system may be defined as \textit{holonomic} if all constraints of the system are holonomic. For a constraint to be holonomic it must be expressible as a function:
 \begin{align}
@@ -423,9 +431,9 @@ Decoupled translational and angular velocities make the estimation process less 
 Having wheel encoder velocity readings $w_0,w_1,w_2,w_3$, a Cartesian velocity estimate for the base can be calculated
 \begin{align}
 \begin{bmatrix}
-\dot{x} \\
-\dot{y} \\
-\dot{\theta}
+\dot{\hat{x}} \\
+\dot{\hat{y}} \\
+\dot{\hat{\theta}}
 \end{bmatrix}
 = 
 \frac{R}{4}
@@ -440,9 +448,10 @@ w_1 \\
 w_2 \\ 
 w_3
 \end{bmatrix} \quad .
+\label{eq:base vel estimate}
 \end{align}
-Integrating these velocities makes it possible to localize the base relative to the starting position.
-Odometry estimates are assumed to have a normal distribution, accounting for measurement noise and kinematic nature of the model (ignores dynamic effects)
+Integrating the velocities from \eqref{eq:base vel estimate} makes it possible to localize the base relative to the starting position.
+Odometry estimates are assumed to have a normal distribution, accounting for measurement noise and kinematic nature of the model that ignores dynamic effects.
 \begin{align}\label{eq:wheel_sigma}
 r_{B} \sim \mathcal{N}(\mu_{r_B},\,\Sigma)\,.
 \end{align}
@@ -466,12 +475,12 @@ The wheel and LIDAR odometry data is fused using an Extended Kalman Filter \foot
 A process and observation model is used to represent the movement of the Thing mobile manipulator:
 \begin{subequations}\label{state_space_nl2}
 \begin{gather}
-x_k = f\left(x_{k-1}\right) + w_{k-1} , \ x \in \mathbb{R}^n \\
-z_k = h\left(x_k\right) + v_k, \ z \in \mathbb{R}^k
+x_k = f\left(x_{k-1}\right) + w_{k-1} , \ x \in \mathbb{R}^n\, , \\
+z_k = h\left(x_k\right) + v_k, \ z \in \mathbb{R}^k\, .
 \end{gather}
 \end{subequations}
-Without going in to the detail on the derivation of the EKF algorithm, it can be described as having two steps.
-The model forecast step uses the motion model and last estimated state $\hat{x}_k^+$ to produce an \textit{a priori} estimate of the next state $\hat{x}_k^-$ and covariance $P_k^-$
+Without going in to detail on the derivation of the EKF algorithm, it can be described as having two steps.\:
+the model forecast step uses the motion model and last estimated state $\hat{x}_k^+$ to produce an \textit{a priori} estimate of the next state $\hat{x}_k^-$ and covariance $P_k^-$
 \begin{subequations}\label{eq:nl_forcast}
 \begin{gather}
 \hat{x}_k^- = f\left(\hat{x}_{k-1}^+\right) \\
@@ -502,10 +511,6 @@ It is also important to note that the EKF assumes white Gaussian noise and thus 
 
 
 \chapter{Motion planning}\label{chapter:motion planning}
-%%%In the case of positioning redundant chains in Cartesian space, the configuration space (joints and Ridgeback pose) of the end effector contains a higher number of dimensions than the task space.
-%%This results in an infinite number of solutions to any task space goal. 
-%%Since in this case closed-form inverse kinematic equations are not available, we resort to an optimization approach.
-%%Within the optimization problem we define constraints that make the number of solutions finite, resulting in convergence.
 As mentioned in chapter \ref{chapter:State estimation}, the primary motion planning objective consists of reaching the desired pose with the end-effector and mobile base.
 However, moving the mobile manipulator safely and efficiently in the workspace is more involved and significantly constrains the primary objective. 
 For instance, it is important to maintain distance from obstacles both with the platform and the manipulator.
@@ -521,63 +526,63 @@ A more contemporary approach of sequential convex optimization provides a more g
 \section{Inverse kinematics}\label{section:inverse kinematics}
 Regulating kinematic tasks that are configuration dependent reduces to the problem
 \begin{align}
-f\left(q\right) = 0 %% TODO check this
+f\left(q\right) = 0 \, . %% TODO check this
 \end{align}
 where $q \in \mathbb{R}^{n} $  is the configuration vector. 
 The classical approach to inverse kinematics would have us find the inverse of the function $f$
 \begin{align}
-q = f^{-1}\left(0\right)
+q = f^{-1}\left(0\right)\, . \label{eq:inverse}
 \end{align}
-However, this inverse only exists in simple and non-redundant configurations, otherwise the solutions are infinite.
-Even in cases where the configuration is non-redundant , the inverse function is still sometimes impossible to derive.
+However, this inverse can only exist in non-redundant configurations, otherwise the number of solutions is infinite.
+Even in cases where the configuration is non-redundant , the inverse function is still occasionally impossible to derive.
 In order to solve this problem, an optimization approach which avoids dealing with complicated analytical expressions is employed.
 \subsection{Differential inverse kinematics}
 In an inverse differential kinematics scheme used for redundant kinematic chains, $f\left(q\right)$ is regulated to the target value using
 \begin{align}
 \label{diffik_1}
-\frac{\partial}{\partial q}f = -\lambda_{f}f\left(q\right), \lambda_{f} > 0
+\frac{\partial}{\partial q}f = -\lambda_{f}f\left(q\right), \lambda_{f} > 0 \, .
 \end{align}
 The solution to \ref{diffik_1} is often rank-deficient, so a least squares formulation is employed
 \begin{align}
 \label{diffik_2}
-\min\limits_{\dot{q}} & \frac{1}{2}\left\Vert\frac{\partial f}{\partial q} \dot{q} + \lambda_{f}f\left(q\right)\right\Vert^2, \lambda_{f} > 0
+\min\limits_{\dot{q}} & \frac{1}{2}\left\Vert\frac{\partial f}{\partial q} \dot{q} + \lambda_{f}f\left(q\right)\right\Vert^2, \lambda_{f} > 0 \, .
 \end{align}
 Letting $J = \frac{\partial f}{\partial q}$ and $a = -\lambda_{f}f\left(q\right)$, the solution to \ref{diffik_2} that minimizes the $L_{2}$ norm is given by finding the pseudoinverse of the $A$ matrix
 \begin{align}
 \label{diffik_4}
-\dot{q} = J^{\dagger}a 
+\dot{q} = J^{\dagger}a  \, .
 \end{align}
 \subsection{The Jacobian pseudoinverse and numerical filtering}
 In \eqref{diffik_1}-\eqref{rresolution_2}, the pseudoinverse operation denoted by $\dagger$ is defined as 
 \begin{align}
-J^{\dagger} = J^T\left(JJ^T\right)^{-1}
+J^{\dagger} = J^T\left(JJ^T\right)^{-1}\, .
 \end{align}
-While still more numerically stable than an outright inverse , this method is also subject to \textit{kinematic singularities} in the manipulator.
-These are configurations where a large configuration change is required for a given task as seen by the linearized system.
+While more numerically stable than the classic inverse operator in \eqref{eq:inverse}, this method is also subject to \textit{kinematic singularities} in the manipulator.
+These are configurations where the linear system requires a large configuration change in order to accomplish a given task space change.
 The components of the task Jacobian $\frac{\partial f}{\partial q}$ then approach 0, resulting in loss of rank.
 Implementing the pseudo-inverse in a numerically stable way is very important for robustness and non-trivial.
 \subsubsection{Damped psudoinverse}
 We often use the more numerically stable \textit{damped pseudoinverse} \citep{chan1988general}
 \begin{align}
-J^{\#} = J^T\left(JJ^T + \lambda I\right)^{-1} ,  \lambda \in \mathbb{R}
+J^{\#} = J^T\left(JJ^T + \lambda I\right)^{-1} ,  \lambda \in \mathbb{R}\, .
 \end{align}
 There are also various contemporary approaches to implementing the pseudoinverse \citep{chiaverini1994review}. 
 In this work we use the \textit{selectively damped pseudoinverse} \citep{buss2005selectively}, alongside with \textit{singular value filtering} described in \citep{colome2015closed}.
 \subsubsection{Selectively damped pseudoinverse}
 The matrix pseudoinverse operation can be performed using an SVD decomposition of the Jacobian
 \begin{align}
-J = \sum\limits_{i}{\sigma_{i}u_iv_i^T}
+J = \sum\limits_{i}{\sigma_{i}u_iv_i^T}\, .
 \end{align}
 \begin{align}
-J^T\left(JJ^T\right)^{-1} = \sum\limits_{i}{\frac{1}{\sigma_{i}}v_iu_i^T}
+J^T\left(JJ^T\right)^{-1} = \sum\limits_{i}{\frac{1}{\sigma_{i}}v_iu_i^T}\, .
 \end{align}
-The damped pseudoinverse would in this case have the form 
+The pseudoinverse would in this case have the form 
 \begin{align}
-J^T\left(JJ^T + \lambda I\right)^{-1} = \sum\limits_{i}{\frac{\sigma_{i}}{\sigma_{i}^2 + \lambda}v_iu_i^T}
+J^T\left(JJ^T + \lambda I\right)^{-1} = \sum\limits_{i}{\frac{\sigma_{i}}{\sigma_{i}^2 + \lambda}v_iu_i^T}\, ,
 \end{align}
-The \textit{selectively damped pseudoinverse} \citep{buss2005selectively} equates to choosing a specific value $\lambda_i$ for each singular value $\sigma_i$
+this \textit{selectively damped pseudoinverse} \citep{buss2005selectively} equates to choosing a specific value $\lambda_i$ for each singular value $\sigma_i$
 \begin{align}\label{eq:sdp}
-J^{\#} = \sum\limits_{i}{\frac{\sigma_{i}}{\sigma_{i}^2 + \lambda_i}v_iu_i^T}
+J^{\#} = \sum\limits_{i}{\frac{\sigma_{i}}{\sigma_{i}^2 + \lambda_i}v_iu_i^T}\, .
 \end{align}
 \subsubsection{Singular value filtering}
 The singular values of a Jacobian determine it's stability with respect to inversion.
@@ -587,22 +592,23 @@ This technique sets the lowest singular value of a given jacobian matrix $J$ to 
 \begin{align}\label{eq:svf}
 h_{v,\sigma_0}\left(\sigma\right) = \frac{\sigma^3 + v\sigma^2 + 2\sigma + 2\sigma_0}{\sigma^2 + v\sigma + 2}\,.
 \end{align}
-In \eqref{eq:svf} the shape factor $v$ determines the difference between modified and original singular values $h_{v,\sigma_0}(\sigma)-\sigma$, a higher $v$ results in lower differences. This results in a new Jacobian matrix
+In \eqref{eq:svf} the shape factor $v$ determines the difference between modified and original singular values $h_{v,\sigma_0}(\sigma)-\sigma$, a higher $v$ results in lower differences. 
+This results in a new Jacobian matrix
 \begin{align} \label{eq:svf jacobian}
-\hat{J}= \sum\limits_{i}{h_{v,\sigma_0}(\sigma_i)u_iv_i^T}
+\hat{J}= \sum\limits_{i}{h_{v,\sigma_0}(\sigma_i)u_iv_i^T}\, .
 \end{align}
 Authors report that combining this filtering method with any of the above pseudoinverse approaches results in higher stability.
 \section{Redundancy resolution}\label{section:redundancy resolution}
 Given that the valid set of solutions to \ref{diffik_2} is in an affine subspace $\mathcal{F} \in \mathbb{R}^n$, the minimization scheme for solving a lower priority set of tasks would be
 \begin{align}
 \label{diffik_3}
-\min\limits_{\dot{q} \in \mathcal{F}} & \frac{1}{2}\left\Vert\frac{\partial g}{\partial q} \dot{q} + \lambda_{g}f\left(q\right)\right\Vert^2 , \lambda_{g} > 0
+\min\limits_{\dot{q} \in \mathcal{F}} & \frac{1}{2}\left\Vert\frac{\partial g}{\partial q} \dot{q} + \lambda_{g}f\left(q\right)\right\Vert^2 , \lambda_{g} > 0\, .
 \end{align}
 The process of defining additional constraints for a redundant system, thus reducing the affine subspace $\mathcal{F}$ is called \textit{redundancy resolution}.
 The general solution to \eqref{diffik_3}, which minimizes the $L_2$ norm of the primary task while making redundant DOFs available to other inputs $z$ has the form
 \begin{align}
 \label{rresolution_0}
-\dot{q} = J^{\#}a + \left(I - J^{\#}J\right)z ,  z \in \mathbb{R}^n
+\dot{q} = J^{\#}a + \left(I - J^{\#}J\right)z ,  z \in \mathbb{R}^n\, .
 \end{align}
 The operator $\left(I - J^{\#}J\right)$ is an orthogonal projector, thus the effect of the control $z$ will not affect the outcome in a way that cancels out the first term. 
 \section{Task-prioity kinematics}\label{section:task priority}
@@ -621,7 +627,7 @@ In \citep{chiaverini1997singularity}, a modified approach is introduced , which 
 \begin{align}
 \label{rresolution_2}
 \dot{q} = A^{\dagger}a + \left(I - A^{\dagger}A\right)B^{\dagger}b + 
-\left(I - \left(A \atop B\right)^{\dagger}\left(A \atop B\right)\right)z
+\left(I - \left(A \atop B\right)^{\dagger}\left(A \atop B\right)\right)z\, .
 \end{align}
 Here the trade-off is lower accuracy and slower convergence because the expression is only an approximation of \eqref{rresolution_1}.
 \subsection{Motion planning scheme}
@@ -631,8 +637,9 @@ The secondary task handles mobile base trajectory following.
 As mentioned in \ref{section:task priority}, this framework can be extended to any number of tasks, but the increasing numerical instability results in diminishing returns.
 \begin{align}
 \label{rresolution_3}
-\Delta q \approx J_{EE}^{\dagger}\Delta r_{EE} + \left(I - J_{EE}^{\dagger}J_{EE}\right)J_{B}^{\dagger}\Delta r_{B}
+\Delta q \approx J_{EE}^{\dagger}\Delta r_{EE} + \left(I - J_{EE}^{\dagger}J_{EE}\right)J_{B}^{\dagger}\Delta r_{B}\, .
 \end{align}
+
 \subsection{Drawbacks}\label{subsec:tp drawbacks}
 The main drawback to task-priority kinematics in \eqref{rresolution_1} and \eqref{rresolution_2} is that they cannot natively handle nonlinear inequality constraints \citep{moe2016set} and equality constraints. 
 Having the ability to define this type of constraint in motion planning is important for more complex systems such as mobile manipulators.
@@ -640,6 +647,7 @@ Having the ability to define this type of constraint in motion planning is impor
 There are currently no open-source implementations for task-priority schemes , as the parameters and structure of the 
 scheme vary greatly depending on the tasks and kinematic chain structure.
 A more general definition of the problem as a non-linear constrained optimization problem would allow us to utilize the vast array of open-source solvers, implementations and solution schemes developed for a wider range of problems.
+
 \section{Sequential convex optimization}\label{section:sqp}
 Performing tasks with a kinematic chain can also be formulated as a bounded non-linear optimization problem $P$. 
 The non-linear objective function $f$ is minimized subject to non-linear inequality and equality constraints $g , h$, while keeping the parameter vector $x$ within bounds. 
@@ -655,14 +663,14 @@ The non-linear objective function $f$ is minimized subject to non-linear inequal
 We can solve this problem iteratively, by repeatedly constructing and minimizing a convex approximation of the problem $\tilde{P}$ until constraints are satisfied. With $\tilde{f}$ being the quadratic approximation of the objective function $f$,
 \begin{align}
 \label{optik_2}
-\tilde{f}\left(x\right) = f\left(x^k\right) + \nabla f\left(x^k\right)\left(x - x^k\right) + \frac{1}{2}\left(x - x^k\right)^T Hf\left(x^k\right)\left(x - x^k\right)
+\tilde{f}\left(x\right) = f\left(x^k\right) + \nabla f\left(x^k\right)\left(x - x^k\right) + \frac{1}{2}\left(x - x^k\right)^T Hf\left(x^k\right)\left(x - x^k\right)\, .
 \end{align}
  and $\tilde{g}, \tilde{h}$ being local affine approximations of constraint functions
  \begin{eqnarray}
  \begin{split}
  \label{optik_3}
-\tilde{g}\left(x\right) = g\left(x^k\right) + \nabla g\left(x^k\right)\left(x - x^k\right) \\
-\tilde{h}\left(x\right) = h\left(x^k\right) + \nabla h\left(x^k\right)\left(x - x^k\right) 
+\tilde{g}\left(x\right) = g\left(x^k\right) + \nabla g\left(x^k\right)\left(x - x^k\right)\, , \\
+\tilde{h}\left(x\right) = h\left(x^k\right) + \nabla h\left(x^k\right)\left(x - x^k\right)\, . 
 \end{split}
 \end{eqnarray}
 Using quadratic programming (QP) techniques, we solve $\tilde{P}$
@@ -670,14 +678,14 @@ Using quadratic programming (QP) techniques, we solve $\tilde{P}$
 \label{optik_4}
  \begin{array}{rl}
 \min\limits_{x} & \mathcal{L}\left(x,\mu\right)\\
-\mbox{s.t.} & x \in \left[x_{min}, x_{max}\right]
+\mbox{s.t.} & x \in \left[x_{min}, x_{max}\right]\, .
 \end{array}
 \end{align}
 Where $\mathcal{L}\left(x,\mu\right)$ represents the problem Lagrangian
 \begin{align}
 \label{optik_5}
 \mathcal{L}(x,\mu) = \tilde{f}\left(x\right) + \mu\sum\limits_{i = 1}^{i_{max}}{\tilde{g}_{i}\left(x\right)}
-+ \mu\sum\limits_{j = 1}^{j_{max}}{\tilde{h}_{j}\left(x\right)}
++ \mu\sum\limits_{j = 1}^{j_{max}}{\tilde{h}_{j}\left(x\right)}\, .
 \end{align}
 The Lagrange multiplier $\mu > 0 \in \mathbb{R}$ is a large positive value that regulates the priority of constraints over the objective function. Setting a sufficiently large value for $\mu$ turns the problem into a constraint satisfaction problem
 \begin{align}
@@ -696,6 +704,7 @@ In kinematic planning $f\left(x\right)$ is often employed to keep the chain in a
 f\left(x\right) = \left(x - x_{seed}\right)W\left(x - x_{seed}\right)^{T}\, .
 \end{align}
 This results in more predictable solutions to the problem, often avoiding non-modelled dynamic constraints resulting from large changes in configuration.
+
 \subsubsection{Pose control}
 We regulate the execution of a pose goal $r$ using equality constraint functions of the type
 \begin{align}
@@ -707,17 +716,18 @@ Convexifying \eqref{eq:optik_8_aux} results in the familiar linear equation
 \label{eq:optik_8}
 h\left(x\right) = \left\vert J\left(x - x_{k}\right) - \Delta r \right\vert = 0\, .
 \end{align}
-In the case of a Cartesian task-space, the error between target pose and current pose in \eqref{eq:optik_8} can be represented in the form of a 6d vector
+In the case of a Cartesian task-space, the error between target pose and current pose in \eqref{eq:optik_8} can be represented in the form of a 6D vector
 \begin{align}
-\Delta r = \log\left(T_{target}^{-1}\left(a\right) T_{current}\left(x\right)\right)
+\Delta r = \log\left(T_{target}^{-1}\left(a\right) T_{current}\left(x\right)\right)\, .
 \end{align}
-The $\log$ operator here is the matrix $\log$ operator (further explain later).
+The $\log$ operator here is the matrix $\log$ operator.
 This vector can also be obtained using identities \eqref{eq:pose difference}.
+
 \subsubsection{Obstacle avoidance}
 Obstacle avoidance can be handled as an inequality constraint in the NL optimization problem.
 The simplest way of implementing this is using the constraint function
 \begin{align}
-g\left(x\right) = \left\vert p_{base} - p_{obstacle} \right\vert \leq R
+g\left(x\right) = \left\vert p_{base} - p_{obstacle} \right\vert \leq Rq, .
 \end{align}
 This can in turn be extended to any number of obstacles.
 Collision checking libraries are often used to find a set of closest points for which to optimize.
@@ -725,12 +735,12 @@ Collision checking libraries are often used to find a set of closest points for 
 Having a metric $M$ that describes the distance from singularity of the system Jacobian, we could use the scheme in \eqref{optik_1} to optimize task execution.
 The manipulability metric of a kinematic chain has a couple of different definitions, the one used here is
 \begin{align}
-M = \sqrt{\det{\left(JJ^T\right)}}
+M = \sqrt{\det{\left(JJ^T\right)}}\, .
 \end{align}
 Here $J$ is the kinematic chains Jacobian with respect to the Cartesian (although not necessarily) task-space.
 Through matrix manipulation it is possible to obtain a closed-form expression for the manipulability Jacobian
 \begin{align}
-\frac{\partial M}{\partial x} = \frac{1}{2\sqrt{\det{\left(JJ^T\right)}}} Tr\left(\left(JJ^T\right)^{-1}\frac{\partial \left(JJ^T\right)}{\partial x}\right)
+\frac{\partial M}{\partial x} = \frac{1}{2\sqrt{\det{\left(JJ^T\right)}}} Tr\left(\left(JJ^T\right)^{-1}\frac{\partial \left(JJ^T\right)}{\partial x}\right)\, .
 \end{align}
 It might be possible to get this expression in symbolic form, but can be inefficient for real-time applications.
 Even though maximizing the manipulability measures increases the product of singular values, it does not mean that the smallest singular value will be sufficiently large. 
@@ -743,7 +753,7 @@ However this does not maximize the magnitude of singular values itself.
 The objective function to maximize a combination of these two metrics
 \begin{align}
 \label{mnptik_1}
-f\left(x\right) = \sqrt{\frac{\kappa}{M}}
+f\left(x\right) = \sqrt{\frac{\kappa}{M}}\, .
 \end{align}
 In the context of the mobile manipulator following both an end effector and base trajectory, this means that the optimization will utilize the mobile base orientation $\theta$ to maximize manipulability while ensuring that all the singular values are roughly the same magnitude.
 \subsection{Motion planning scheme}
@@ -771,12 +781,19 @@ Additionally, we limit the search space to within the joint limits $[q_{min}, q_
 \subsection{The SQP algorithm}
 Sequential convex optimization optimization can be tackled using sequential quadratic programming (SQP) \citep{schulman2013finding, xu2010two}, a powerful algorithm which repeatedly constructs and minimizes a convex approximation of the problem $\tilde{P}$ until constraints are satisfied.
 \paragraph*{Convexify}
-For each point in the desired trajectory and the penalty value $\mu$, we form convex cost functions at the operating point.
+For each point in the desired trajectory and the penalty value $\mu$, we form convex cost and constraint functions at the operating point.
+The cost function is convexified to a second-order approximation while the constraints are linearized at the current configuration.
 \paragraph*{Minimize}
 The convexified problems are minimized, where the parameter values being considered are subject to the trust region $\delta$.
-This prevents the minimization process from taking big steps when the convex approximations do not reflect the real situation.
+This prevents the minimization process from taking large steps when the changes in the convex cost and constraint models do not reflect the changes in the non-linear models to a sufficient degree.
 \paragraph*{Trust Region}
-At each iteration of the innermost for loop, a trust region $\delta$ for the QP problem is updated depending on how well the change proposed by the minimization algorithm reflect the change of the non-convex models of the cost functions. 
+At each iteration of the innermost for loop, a trust region $\delta$ for the QP problem is updated depending on how well the change proposed by the minimization algorithm translates to the change in non-linear models of the cost and constraint functions.
+If the change is deemed sufficient, the step size for the next iteration is increased by modifying the parameter search area of the optimization algorithm.
+\paragraph*{Check constraints} 
+Once the convexify loop converges (the changes in $q$ become sufficiently small) or reaches a maximum number of iterations, the result is checked against constraints.
+If the constraints are satisfied, the algorithm concludes.
+Otherwise, the penalty $\mu$ is increased (usually by a degree of magnitude) and the algorithm is repeated.
+
 \begin{algorithm}[h]
  \KwData{$q = q_{init}\, , f,g,h$}
  \KwResult{Configuration $q$ satisfying $f,g,h$}
@@ -805,23 +822,6 @@ At each iteration of the innermost for loop, a trust region $\delta$ for the QP 
  \caption{The SQP algorithm}
  \label{algorithm:sqp}
 \end{algorithm}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -931,13 +931,44 @@ Depending on the interface, this controller will forward commands or actually co
 Additionally, we use the joint trajectory controllers which can handle and interpolate multiple timed trajectory points.
 
 
+
+
+
+
+
+
+
+
+
 \chapter{Results}
+This chapter covers the results of the presented state estimation and motion planning approaches.
+Since motion planning was considered on a purely kinematic level, it is extensively tested in both simulation and on the real robot.
+State estimation testing proved more difficult as dynamic effects such as slip are not easily simulated.
+For this reason state estimation was only explored in data sets collected from the real robot.
 \section{Simulation}
-\section{Real}
+The Thing mobile manipulator is simulated using the Gazebo simulator.
+Aside from being open-source, the main advantage of this simulator is that it is fully integrated within the ROS ecosystem.
+Furthermore, the \verb|ros_control| controllers used on the actual robot are also integrated in the Gazebo simulation, expediting the implementation procedure.
 \begin{figure}[h]
 \centering
-\includegraphics[width=.75\textwidth]{localization1}
-\caption{Simulated localization}
+ \includegraphics[width=0.75\textwidth, clip = 0cm 0cm 0cm 0cm]{gazebo_screenshot1}
+ \caption{The Thing manipulator in a simulated Gazebo environment.}
+\end{figure}
+
+\section{Real}
+%\begin{figure}[h]
+%\centering
+%\includegraphics[width=.75\textwidth]{localization1}
+%\caption{Simulated localization}
+%\end{figure}
+
+\subsection{Localization results}
+Localization tests were performed in the VICON laboratory at the University of Toronto Institute for Aerospace Studies (UTIAS).
+VICON is a commercial motion capture system ideal for the purposes of setting ground-truth values for state estimation tests. 
+\begin{figure}[h]
+\centering
+\includegraphics[width=.75\textwidth]{lidar_test1}
+\caption{Localization test setup}
 \end{figure}
 \begin{figure}[h]
 \centering

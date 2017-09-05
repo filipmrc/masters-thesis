@@ -165,10 +165,10 @@
 
 \begin{scope}[on background layer]
 \draw[black,very thick,rounded corners, fill = white] ($(CERES.north west)+(-1,1.1)$)  rectangle ($(THING KINEMATICS.south east)+(0.3,-0.9)$);
-\draw[black,thick] ($(ROS CONTROL.north west)+(-1.6,0.6)$)  rectangle ($(UR10 API.south east)+(5,-1)$);
+\draw[black,thick,dashed] ($(ROS CONTROL.north west)+(-1.6,0.6)$)  rectangle ($(UR10 API.south east)+(5,-1)$);
 \end{scope}
-\draw[black,thick] ($(RIDGEBACK API.north west)+(-0.3,0.4)$)  rectangle ($(UR10 API.south east)+(0.3,-0.4)$);
-\draw[black,thick] ($(TASK.north west)+(-6,0.4)$)  rectangle ($(THING KINEMATICS.south east)+(1,-1.3)$);
+\draw[black,thick,dashed] ($(RIDGEBACK API.north west)+(-0.3,0.4)$)  rectangle ($(UR10 API.south east)+(0.3,-0.4)$);
+\draw[black,thick,dashed] ($(TASK.north west)+(-6,0.4)$)  rectangle ($(THING KINEMATICS.south east)+(1,-1.3)$);
 
 
 \node (thing control text) at ($(THING CONTROL.north)+(0,0.4)$) [] {\textbf{thing control}};
