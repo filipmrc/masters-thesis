@@ -1,7 +1,8 @@
 \documentclass[times, utf8, diplomski, english]{fer}
 \usepackage{booktabs}
 \usepackage{algpseudocode}
-\usepackage{algorithm}
+%\usepackage{algorithm}
+\usepackage[ruled,linesnumbered]{algorithm2e}
 \usepackage{subcaption}
 \usepackage[mode=buildnew]{standalone}% requires -shell-escape
 \usepackage{pgf}
@@ -12,7 +13,9 @@
 \usetikzlibrary{patterns}
 \usetikzlibrary{backgrounds}
 \graphicspath{{./slike/}}
-
+\algtext*{EndWhile}% Remove "end while" text
+\algtext*{EndIf}% Remove "end if" text
+%\algtext*{EndFor}% Remove "end fot" text
 \begin{document}
 
 % TODO: Navedite broj rada.
@@ -45,9 +48,6 @@ A variety of issues related to mobile manipulators have been explored in the pas
 These include dynamic and static stability, force development and application, maximum payload determination, etc \citep{papadopoulos1999framework,korayem2004analysis}.
 However, a majority of the research concerning mobile manipulators deals with motion planning and state estimation \citep{yamamoto1992coordinating,korayem2012mathematical}.
  
-%While these types of robots have been studied and used in space exploration \citep{leshin2013volatile}, they have only recently been introduced for commercial robotics applications.
-%This makes the above mentioned challenges an important area of research as there 
-
 This thesis explores the problems of state estimation and motion planning in the context of an omni-directional mobile manipulator.
 Chapter \ref{chapter:thing} introduces the "Thing" mobile manipulator used in this work.
 Each major component is described in appropriate detail, keeping in mind the context of research presented.
@@ -60,7 +60,7 @@ Finding the base position relative to the starting position is explored in secti
 Finally, two approaches two motion planning are described in chapter \ref{chapter:motion planning}.
 A classical approach enables defining priorities for kinematics tasks assigned to the robot, which are then applied in a classical optimization scheme.
 The more contemporary \textit{sequential convex optimization} is also explored, which enables defining non-linear inequality and equality constraints. 
-These two approaches offer a powerful framework for integrating various tasks.
+These two approaches offer a powerful framework for local motion planning and trajectory optimization.
 
 \chapter{Thing mobile manipulator}\label{chapter:thing}
 The Thing mobile manipulator is composed of a Ridgeback omni-directional platform and a UR10 manipulator arm equipped with a Robotiq 3-Finger Adaptive Robot Gripper is used as the end-effector.
@@ -127,13 +127,13 @@ For improved localization and obstacle avoidance, the navigation stack ROS packa
 \subsection{Hokuyo LIDAR}
 The Hokuyo UST-10LX Scanning Laser Rangefinder is a small, accurate, high-speed device for obstacle detection and localization of autonomous robots and automated material handling systems. 
 This model uses Ethernet interface for communication and can obtain measurement data in a wide field of view up to a distance of 10 meters with millimeter resolution.
-\begin{figure*}[t!]
-    \centering
-        \begin{subfigure}[t]{0.2\textwidth}
-        \includegraphics[width=\textwidth]{hokuyo_pic}
-    \end{subfigure}
-    \caption{The Hokuyo UST-10LX LIDAR}\label{fig:ur10}
-\end{figure*}
+%\begin{figure*}[t!]
+%    \centering
+%        \begin{subfigure}[t]{0.2\textwidth}
+%        \includegraphics[width=\textwidth]{hokuyo_pic}
+%    \end{subfigure}
+%    \caption{The Hokuyo UST-10LX LIDAR}\label{fig:ur10}
+%\end{figure*}
 This sensor uses a laser source to scan 270$^\circ$ field of view. Positions of objects in the range are calculated with step angle and distance. Sensor outputs these data through communication channel.
 
 \section{UR10} 
@@ -141,7 +141,7 @@ The UR10 is Universal robotics largest collaborative industrial manipulator.
 It is a full 6DOF robotic arm capable of mimicking human arm movements.
 During operation it can handle weights up to 10 kg, making it viable for a wide range of tasks.
 The provided drivers enable performing collaborative tasks with human operators, allowing for easy positioning of the arm through compliant movement and preventing use of excessive force on impact.wwwww
-\begin{figure*}[t!]
+\begin{figure*}[h]
     \centering
     \begin{subfigure}[t]{0.34\textwidth}
         \includegraphics[width=\textwidth]{ur10_right}
@@ -341,32 +341,45 @@ J =
 \begin{bmatrix}
 J_{v} \\ 
 J_{\omega}
-\end{bmatrix}
+\end{bmatrix}\, ,
 \label{jacob1}
 \end{equation}
-Where the matrix $J_v$ is the position Jacobian and $J_{\omega}$ matrix is the orientation Jacobian.
-In this case, the components representing orientation change are equal to the rotation axes of the joint $q_j$.
+where the matrix $J_v$ is the position Jacobian and $J_{\omega}$ matrix is the orientation Jacobian.
+In this case, the components representing orientation change are equal to the rotation axes of the joint $q_j$
 \begin{align}
-J_{\omega_j} = \dfrac{\partial o}{\partial q_j} = z_{j}
+J_{\omega_j} = \dfrac{\partial o}{\partial q_j} = z_{j}\, .
 \end{align}
 The components representing position difference for rotational joints are
 \begin{equation}
-J_{v_j} = \dfrac{\partial p}{ \partial q_{j}} = z_j \times (w - p_j)
+J_{v_j} = \dfrac{\partial p}{ \partial q_{j}} = z_j \times (w - p_j)\, .
 \end{equation}
-For prismatic joints, this element is equal to the rotation axis
+For prismatic joints the orientation component is $J_{\omega_j} = 0$, while the translational component lies on the $z$ axis
 \begin{equation}
-J_{v_j} = \dfrac{\partial p}{ \partial q_j} = z_j
+J_{v_j} = \dfrac{\partial p}{ \partial q_j} = z_j\, .
 \end{equation}
-Resulting in the geometric Jacobian matrix
-\begin{equation}
-J =
-\begin{bmatrix}
-z_{0} \times (w - p_{0}) &z_{1} \times (w - p_{1}) &\ldots &z_{n-1} \times (w - p_{n-1})\\
-z_{0} &z_{1} &\ldots &z_{n-1}\\
-\end{bmatrix}
-\label{jacob2}
-\end{equation}
-The pose change vector $w$ is defined as the composition of translational and rotational velocities.
+As seen in Algorithm~\ref{algorithm:jacobian calc}, the geometric derivation is suitable for software implementation as it does not require symbolic calculations and relies only on matrix operations.
+\begin{algorithm}[h]
+ \KwData{Kinematic chain transforms $T_{i}$ and joint type flags $rev_i$} 
+ \KwResult{End-effector Jacobian matrix $J$}
+ $T=I$\;
+ \For{$i = 1, 2, ..., N$}{
+ $T = TT_{i}$\;
+ $R_i = R(T)$\;
+ $O_{i} = O(T)$\;
+ \eIf{$i = 1$}{
+ 	$z_i = (rev_i)\mathbf{1}$\;
+ 	$v_i = (rev_i)z_i \times w + (1-rev_i)z_i$\;
+ }{
+  	$z_i = (rev_i)R_{i-1}\begin{bmatrix}0& 0& 1\end{bmatrix}^T$\;
+ 	$v_i = (rev_i)z_i \times (r - O_{i-1}) + (1-rev_i)z_i$\;
+ }
+ }
+ $J = \begin{bmatrix}v &z \end{bmatrix}^T$
+ \caption{Geometric Jacobian calculation}
+ \label{algorithm:jacobian calc}
+\end{algorithm}
+
+The \textit{twist} vector $w$ is defined as the composition of translational and rotational velocities.
 For small enough pose difference $\Delta r$, the vectors are approximately equal
 \begin{align}\label{eq:pose_diff}
 w  = 
@@ -379,7 +392,7 @@ v \\ \omega
 \Delta o
 \end{bmatrix}
 = 
-\Delta r
+\Delta r \, .
 \end{align}
 Calculating the position difference is straightforward and comes down to subtracting the goal and current positions
 \begin{align}
@@ -764,34 +777,34 @@ The convexified problems are minimized, where the parameter values being conside
 This prevents the minimization process from taking big steps when the convex approximations do not reflect the real situation.
 \paragraph*{Trust Region}
 At each iteration of the innermost for loop, a trust region $\delta$ for the QP problem is updated depending on how well the change proposed by the minimization algorithm reflect the change of the non-convex models of the cost functions. 
-\begin{algorithm}
-\label{optik_alg}
-\caption{SQP}
-\begin{algorithmic}
-\For{$\mu = 10^0 , 10^1, 10^2 ...$}
-\For{$i = 1, 2, ..., ITER\_LIMIT$} 
-\State $\tilde{f}, \tilde{g}, \tilde{h} \gets$ Convexify($f,g,h$)
-\Comment convexify problem
-\For{$j = 1, 2, ...$} 
-\State $ \begin{array}{rl} \min\limits_{q} & G(\tilde{f}, \tilde{g}, \tilde{h}) \\
- \mbox{s.t.} & q \in \left[q - \delta, q + \delta \right] \end{array}$
-\Comment minimize \eqref{optik_4}
-\If {TrueImprove / ModelImprove $\ge$ c} 
-    \State $\delta \gets \tau^+ \delta$
-    	\Comment expand trust region
-    \State \textbf{break}
-\EndIf
-\State $\delta \gets \tau^- \delta$
-\Comment shrink trust region 
-\If{converged()}
-    \State \textbf{return} solution
-\EndIf
-\EndFor
-\EndFor
-\EndFor
-\end{algorithmic}
+\begin{algorithm}[h]
+ \KwData{$q = q_{init}\, , f,g,h$}
+ \KwResult{Configuration $q$ satisfying $f,g,h$}
+ \For{PenaltyIteration = 1,2,\, \dots}{
+  \For{ConvexifyIteration = 1,2,\, \dots}{
+  $\tilde{f}, \tilde{g}, \tilde{h} \gets$ Convexify($f,g,h$)\tcc*[r]{convexify problem}
+   \For{TrustRegionIteration = 1,2,\, \dots }{
+   $\begin{array}{rl} \min\limits_{q} & G(\tilde{f}, \tilde{g}, \tilde{h}) \\
+    \mbox{s.t.} & q \in \left[q - \delta, q + \delta \right] \end{array}$\tcc*[r]{minimize}
+   \If{TrueImprove / ModelImprove $\ge$ c}{
+   $\delta \gets \tau^+ \delta$\tcc*[r]{expand trust region and proceed}
+   \textbf{break}\;
+   }
+   $\delta \gets \tau^- \delta$\tcc*[r]{shrink trust region and repeat}
+ }
+   \If{Converged()}{
+   \textbf{break}\;
+   }
+ }
+  \eIf{$SatisfiesConstraints$}{
+ \textbf{return} $q$\;
+ }{
+ $\mu = k*\mu$\;
+ }
+ }
+ \caption{The SQP algorithm}
+ \label{algorithm:sqp}
 \end{algorithm}
-
 
 
 
@@ -840,9 +853,10 @@ The network-based nature of ROS systems allows a distributed software architectu
 This enables keeping real-time dependent functionalities on the robot while running high level algorithms on a separate machine.
 Specifically, the control algorithms implemented in \verb|ros_control| interface with the local UR10 and Ridgeback drivers and are ran on the robot's local machine which acts as a server.
 Task-specific programs are ran on a separate machine or client which connects to the Thing's ROS core via WiFi or ethernet.
-\begin{figure}\label{fig:overview}
+\begin{figure}
 \includestandalone[width=\textwidth]{slike/software_tikz}
 \caption{Overview of the software architecture. White rounded rectangles represent ROS packages, while cross-hatched rectangles represent individual libraries/headers/executables.}
+\label{fig:overview}
 \end{figure} 
 
 \subsubsection{Client}
