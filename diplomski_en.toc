@@ -11,11 +11,11 @@
 \contentsline {section}{\numberline {3.2}Kinematic model}{9}
 \contentsline {subsection}{\numberline {3.2.1}Forward kinematics}{9}
 \contentsline {subsection}{\numberline {3.2.2}Differential forward kinematics}{10}
-\contentsline {subsubsection}{End-effector Jacobian}{10}
-\contentsline {section}{\numberline {3.3}Localization}{11}
+\contentsline {subsubsection}{End-effector Jacobian}{11}
+\contentsline {section}{\numberline {3.3}Localization}{12}
 \contentsline {subsection}{\numberline {3.3.1}Wheel odometry}{12}
 \contentsline {subsection}{\numberline {3.3.2}LIDAR odometry}{13}
-\contentsline {subsection}{\numberline {3.3.3}Extended Kalman filter}{13}
+\contentsline {subsection}{\numberline {3.3.3}Extended Kalman filter}{14}
 \contentsline {chapter}{\numberline {4}Motion planning}{15}
 \contentsline {section}{\numberline {4.1}Inverse kinematics}{15}
 \contentsline {subsection}{\numberline {4.1.1}Differential inverse kinematics}{16}

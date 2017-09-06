@@ -62,6 +62,7 @@ A classical approach enables defining priorities for kinematics tasks assigned t
 The more contemporary \textit{sequential convex optimization} is also explored, which enables defining non-linear inequality and equality constraints. 
 These two approaches offer a powerful framework for local motion planning and trajectory optimization.
 
+
 \chapter{Thing mobile manipulator}\label{chapter:thing}
 The Thing mobile manipulator is composed of a Ridgeback omni-directional platform and a UR10 manipulator arm equipped with a Robotiq 3-Finger Adaptive Robot Gripper is used as the end-effector.
 The three systems are essentially separate on the lower level: the RIdgeback, UR10 and Robotiq gripper local hardware interfaces are electronically independent self-contained systems.
@@ -201,6 +202,8 @@ It is created for applications in advanced manufacturing and robotics research.
 All the fingers can be independently position,velocity and force controlled and can exert forces from 50 to 60 $N$ at the finger tips.
 
 
+
+
 \chapter{State estimation}\label{chapter:State estimation}
 State estimation is an often encountered challenge when working with autonomous systems.
 Most autonomy schemes require accurate information on the current state of the system in order properly modify the system behaviour.
@@ -338,7 +341,7 @@ For a sufficiently small $\Delta$, equation \ref{eq:jacobian_identity} can be ex
 \hat{f}_k = f_{k-1} + J\left(x_{k} - x_{k-1}\right)
 \end{align}
 This framework can be employed in various state estimation and motion planning algorithms.
-
+\newpage
 \subsubsection{End-effector Jacobian}
 For motion planning applications, an estimate on how configuration change affects the end-effector pose $\Delta r_{EE}$ is vital.
 The end-effector Jacobian is defined as the derivative of the end-effector pose \ref{eq:pose} with respect to the configuration vector $q$.
@@ -428,13 +431,14 @@ f(x_1,\ x_2,\ x_3,\ \ldots,\ x_N,\ t)=0
 \end{align} 
 i.e. a holonomic constraint depends only on the coordinates $x_j$ and time $t$. It does not depend on the velocities or any higher order derivative with respect to time $t$.
 Decoupled translational and angular velocities make the estimation process less prone to error, as angular velocities are usually much more difficult to estimate.
-Having wheel encoder velocity readings $w_0,w_1,w_2,w_3$, a Cartesian velocity estimate for the base can be calculated
+Having wheel encoder velocity readings $w_0,w_1,w_2,w_3$, a base twist estimate $\hat{\xi}$ can be calculated
 \begin{align}
-\begin{bmatrix}
-\dot{\hat{x}} \\
-\dot{\hat{y}} \\
-\dot{\hat{\theta}}
-\end{bmatrix}
+%\begin{bmatrix}
+%\dot{\hat{x}} \\
+%\dot{\hat{y}} \\
+%\dot{\hat{\theta}}
+%\end{bmatrix}
+\hat{\xi}
 = 
 \frac{R}{4}
 \begin{bmatrix}
@@ -452,9 +456,9 @@ w_3
 \end{align}
 Integrating the velocities from \eqref{eq:base vel estimate} makes it possible to localize the base relative to the starting position.
 Odometry estimates are assumed to have a normal distribution, accounting for measurement noise and kinematic nature of the model that ignores dynamic effects.
-\begin{align}\label{eq:wheel_sigma}
-r_{B} \sim \mathcal{N}(\mu_{r_B},\,\Sigma)\,.
-\end{align}
+\begin{equation}\label{eq:wheel_sigma}
+\xi \sim \mathcal{N}(\mu_\xi,\,\Sigma)\,.
+\end{equation}
 The covariance matrix $\Sigma$ in \eqref{eq:wheel_sigma} is set to a constant value empirically found to sufficiently represent estimate uncertainty
 \begin{align}
 \Sigma 
@@ -463,13 +467,33 @@ diag\left(0.001,0.001,0.001,100000,100000,0.03\right)\,.
 %\begin{bmatrix}
 %0.001& 0& 0& 0& 0& 0 \\
 %0& 0.001& 0& 0& 0& 0 \\
-%0& 0& 0.001& 0& 0& 0 \\
+%0& 0& 0.001& 0& 0& 0 \\ 
 %0& 0& 0& 1000000& 0& 0 \\
 %0& 0& 0& 0& 1000000& 0 \\
 %0& 0& 0& 0& 0& 0.03 
 %\end{bmatrix}
 \end{align}
-\subsection{LIDAR odometry}
+\subsection{LIDAR odometry}\label{subsection:lidar_odometry}
+A velocity estimate can also be obtained using 
+The Hokuyo LIDAR presents itself as a rich source of information on the environment which can be used to estimate base velocity.
+Various algorithms exist that implement LIDAR odometry, they are mostly based on Iterative Closest Point matching (ICP).
+In this work we use the a range flow-based approach available in the form of the \verb|rf2o_laser_odometry| ROS package.
+
+While this work does not cover the details of this algorithm, the formulation is relatively straightforward.
+Given a base twist $\mathbf{\xi}$, for every point sensed by the LIDAR a geometric residual $\rho\left(\mathbf{\xi}\right)$ is defined 
+\begin{equation}
+\begin{split}
+\rho\left(\mathbf{\xi}\right) &= R_t + \left(x\sin\theta - y\cos\theta - R_\alpha k_\alpha\right)\omega + \left(\cos\theta + \frac{R_\alpha k_\alpha \sin\alpha}{r}\right)v_x \\
+ &+ \left(\sin\theta + \frac{R_\alpha k_\alpha \cos\alpha}{r}\right)v_y\, .
+ \end{split}
+\end{equation}
+To obtain an accurate estimate, the sensor motion is computed by minimizing all geometric residuals within the cost function $F$:
+\begin{align}
+F\left(\rho\right) &= \frac{k^2}{2}\ln{\left(1 + \left(\frac{\rho}{k}\right)^2\right)}\, , \\
+\hat{\xi} &= \min\limits_{\xi} \sum\limits_{i=1}^{N} F \left(\rho_i \left( \mathbf{\xi} \right) \right)\, .
+\end{align}
+Details on parameters and minimization procedure can be found in \citep{jaimez2016planar}.
+
 \subsection{Extended Kalman filter}
 The wheel and LIDAR odometry data is fused using an Extended Kalman Filter \footnote{EKF in rest of text}\citep{MooreStouchKeneralizedEkf2014}.
 A process and observation model is used to represent the movement of the Thing mobile manipulator:
@@ -499,15 +523,6 @@ The $J_f$ and $J_h$ matrices in \eqref{eq:nl_forcast} \eqref{eq:nl_correction} r
 Estimates provided by \eqref{eq:nl_forcast} \eqref{eq:nl_correction} are first-order estimates, higher order estimators of this type exist but are computationally infeasible for real-time applications.
 
 It is also important to note that the EKF assumes white Gaussian noise and thus can only be successfully applied when the actual process and measurement noise have a near-Gaussian distribution.
-
-
-
-
-
-
-
-
-
 
 
 \chapter{Motion planning}\label{chapter:motion planning}
@@ -571,10 +586,8 @@ In this work we use the \textit{selectively damped pseudoinverse} \citep{buss200
 \subsubsection{Selectively damped pseudoinverse}
 The matrix pseudoinverse operation can be performed using an SVD decomposition of the Jacobian
 \begin{align}
-J = \sum\limits_{i}{\sigma_{i}u_iv_i^T}\, .
-\end{align}
-\begin{align}
-J^T\left(JJ^T\right)^{-1} = \sum\limits_{i}{\frac{1}{\sigma_{i}}v_iu_i^T}\, .
+& \ \ \ \ \ J = \sum\limits_{i}{\sigma_{i}u_iv_i^T}\, , \\
+J^T&\left(JJ^T\right)^{-1} = \sum\limits_{i}{\frac{1}{\sigma_{i}}v_iu_i^T}\, .
 \end{align}
 The pseudoinverse would in this case have the form 
 \begin{align}
@@ -780,6 +793,9 @@ Additionally, we limit the search space to within the joint limits $[q_{min}, q_
 %\end{figure}
 \subsection{The SQP algorithm}
 Sequential convex optimization optimization can be tackled using sequential quadratic programming (SQP) \citep{schulman2013finding, xu2010two}, a powerful algorithm which repeatedly constructs and minimizes a convex approximation of the problem $\tilde{P}$ until constraints are satisfied.
+\paragraph*{Initialize}
+The cost and constraint functions can be picked at runtime or compile time.
+An advantage of picking the functions at runtime lies in having the ability to parametrized generic versions of commonly used constraints such as collision avoidance or field of view maintenance.
 \paragraph*{Convexify}
 For each point in the desired trajectory and the penalty value $\mu$, we form convex cost and constraint functions at the operating point.
 The cost function is convexified to a second-order approximation while the constraints are linearized at the current configuration.
@@ -795,8 +811,9 @@ If the constraints are satisfied, the algorithm concludes.
 Otherwise, the penalty $\mu$ is increased (usually by a degree of magnitude) and the algorithm is repeated.
 
 \begin{algorithm}[h]
- \KwData{$q = q_{init}\, , f,g,h$}
+ \KwData{$q_{init}\,$}
  \KwResult{Configuration $q$ satisfying $f,g,h$}
+ $f,g,h \leftarrow$ Initialize()\tcc*[r]{Initialize problem}
  \For{PenaltyIteration = 1,2,\, \dots}{
   \For{ConvexifyIteration = 1,2,\, \dots}{
   $\tilde{f}, \tilde{g}, \tilde{h} \gets$ Convexify($f,g,h$)\tcc*[r]{convexify problem}
@@ -822,6 +839,8 @@ Otherwise, the penalty $\mu$ is increased (usually by a degree of magnitude) and
  \caption{The SQP algorithm}
  \label{algorithm:sqp}
 \end{algorithm}
+
+
 
 
 
@@ -901,17 +920,17 @@ Each state estimation node in \verb|robot_localization| begins estimating the ve
 \section{Motion planning}\label{section:code motion planning}
 Two motion planning algorithm have been developed, one implementing the \textit{task-priority} (\ref{section:task priority}) scheme and the other implementing the scheme in \ref{mnptik_2} cia the SQP (\ref{section:sqp}) algorithm.
 
-Unifying the implementations is a common linear algebra framework, the Eigen3 library\footnote{http://eigen.tuxfamily.org/index.php?title=Main\_ Page}.
+Unifying the implementations is a common linear algebra framework, the Eigen3\footnote{http://eigen.tuxfamily.org/index.php?title=Main\_ Page} library.
 The Eigen3 library is a powerful linear algebra toolbox capable of handling a vast array of dense and sparse matrix calculations.
 It is also templated and heavily optimized for reducing redundant value copying and memory management, making it the basis of many algorithm implementations across a range of fields.
 
 \subsection{Task-priority}
 Unlike the SQP implementations, task-priority is implemented using only the Eigen3 and C++ standard libraries.
 It relies on \textit{singular value filtering} \eqref{eq:svf} and the \textit{selectively damped least squares} \eqref{eq:sdp} formulation to maintain numeric stability in the pseudoinverse operation.
-These functions have been developed from scratch in highly abstracted template form for the purposes of this work and are publicly available\footnote{because of it's compact form it was also included in the appendix}.
+These functions have been developed from scratch in highly abstracted template form for the purposes of this work and are publicly available.
 
 \subsection{Sequential convex optimization}
-Implementation of the sequential convex optimization algorithm is done using Google Ceres solver as the underlying convex optimization subprogram.
+Implementation of the sequential convex optimization algorithm is done using Google Ceres\footnote{http://ceres-solver.org/} solver as the underlying convex optimization subprogram.
 The objective and convexified constraint functions are implemented as classes in order to be compatible with the solver.
 Ceres is configured to run using the Levenberg-Marquardt trust-region strategy with the Broyden–Fletcher–Goldfarb–Shanno algorithm being used for performing line search.
 
@@ -932,28 +951,31 @@ Additionally, we use the joint trajectory controllers which can handle and inter
 
 
 
-
-
-
-
-
-
-
-
 \chapter{Results}
 This chapter covers the results of the presented state estimation and motion planning approaches.
 Since motion planning was considered on a purely kinematic level, it is extensively tested in both simulation and on the real robot.
 State estimation testing proved more difficult as dynamic effects such as slip are not easily simulated.
 For this reason state estimation was only explored in data sets collected from the real robot.
+\begin{figure*}[h]
+    \centering
+    \begin{subfigure}[t]{0.45\textwidth}
+        \includegraphics[trim={35cm 0cm 0cm 0cm},clip,width=\textwidth]{lidar_test1}
+        \caption{Tests in the VICON laboratory}
+        \label{figure:VICONtest}
+    \end{subfigure}
+    \begin{subfigure}[t]{0.45\textwidth}
+        \includegraphics[trim={25cm 2.5cm 10cm 8cm},clip,width=\textwidth]{gazebo_screenshot1}
+        \caption{Simulation testing setup}
+        \label{figure:simulationtest}
+    \end{subfigure}
+    \caption{Example of some real and simulated test setups.}\label{fig:resultsphotos}
+\end{figure*}
+Localization tests were performed in the VICON laboratory at the University of Toronto Institute for Aerospace Studies (UTIAS).
+VICON is a commercial motion capture system ideal for the purposes of setting ground-truth values for state estimation tests and is used as such in all of the tests in this chapter. 
 \section{Simulation}
 The Thing mobile manipulator is simulated using the Gazebo simulator.
 Aside from being open-source, the main advantage of this simulator is that it is fully integrated within the ROS ecosystem.
 Furthermore, the \verb|ros_control| controllers used on the actual robot are also integrated in the Gazebo simulation, expediting the implementation procedure.
-\begin{figure}[h]
-\centering
- \includegraphics[width=0.75\textwidth, clip = 0cm 0cm 0cm 0cm]{gazebo_screenshot1}
- \caption{The Thing manipulator in a simulated Gazebo environment.}
-\end{figure}
 
 \section{Real}
 %\begin{figure}[h]
@@ -963,18 +985,18 @@ Furthermore, the \verb|ros_control| controllers used on the actual robot are als
 %\end{figure}
 
 \subsection{Localization results}
-Localization tests were performed in the VICON laboratory at the University of Toronto Institute for Aerospace Studies (UTIAS).
-VICON is a commercial motion capture system ideal for the purposes of setting ground-truth values for state estimation tests. 
-\begin{figure}[h]
-\centering
-\includegraphics[width=.75\textwidth]{lidar_test1}
-\caption{Localization test setup}
-\end{figure}
+
+%\begin{figure}[h]
+%\centering
+%\includegraphics[trim={35cm 0cm 0cm 0cm},clip,width=.5\textwidth]{lidar_test1}
+%\caption{Localization test setup}
+%\end{figure}
 \begin{figure}[h]
 \centering
 \includegraphics[width=.75\textwidth]{thing_odometry_lidar}
 \caption{Simulated localization}
 \end{figure}
+
 
 
 
