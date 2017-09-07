@@ -5,7 +5,8 @@
 \usepackage[ruled,linesnumbered]{algorithm2e}
 \usepackage{subcaption}
 \usepackage[mode=buildnew]{standalone}% requires -shell-escape
-\usepackage{pgf}
+\usepackage{pgfplots}
+\pgfplotsset{compat=newest}
 \usepackage{tikz}
 \usetikzlibrary{arrows,automata}
 \usetikzlibrary{positioning}
@@ -13,13 +14,13 @@
 \usetikzlibrary{patterns}
 \usetikzlibrary{backgrounds}
 \graphicspath{{./slike/}}
-\algtext*{EndWhile}% Remove "end while" text
-\algtext*{EndIf}% Remove "end if" text
-%\algtext*{EndFor}% Remove "end fot" text
+\usepackage{floatrow}
+\usepackage{hyperref}
+\newfloatcommand{capbtabbox}{table}[][\FBwidth]%\algtext*{EndFor}% Remove "end fot" text
 \begin{document}
 
 % TODO: Navedite broj rada.
-\thesisnumber{000}
+\thesisnumber{1527}
 
 % TODO: Navedite naslov rada.
 \title{From Global to Local: Maintaining Accurate Mobile Manipulator State Estimates Over Long Trajectories}
@@ -53,33 +54,34 @@ Chapter \ref{chapter:thing} introduces the "Thing" mobile manipulator used in th
 Each major component is described in appropriate detail, keeping in mind the context of research presented.
 
 Chapter \ref{chapter:State estimation} deals with the challenge of state estimation for a mobile manipulator.
-Assuming accurate mobile base pose data, it is possible to estimate the state of the manipulator to a reasonable degree of accuracy using only a forward kinematics model described in section \ref{section:Kinematics}.
+Assuming accurate mobile base pose data, it is possible to estimate the state of the manipulator to a reasonable degree of accuracy using only a forward kinematics model described in section \autoref{section:Kinematics}.
 The primary interest thus lies in obtaining the end effector pose estimate, as other estimates can be derived from it if necessary.
-Finding the base position relative to the starting position is explored in section \ref{section:Localization} by fusing local odometry estimates in a probabilistic framework.
+Finding the base position relative to the starting position is explored in section \autoref{section:Localization} by fusing local odometry estimates in a probabilistic framework.
 
-Finally, two approaches two motion planning are described in chapter \ref{chapter:motion planning}.
+Finally, two approaches two motion planning are described in chapter \autoref{chapter:motion planning}.
 A classical approach enables defining priorities for kinematics tasks assigned to the robot, which are then applied in a classical optimization scheme.
 The more contemporary \textit{sequential convex optimization} is also explored, which enables defining non-linear inequality and equality constraints. 
 These two approaches offer a powerful framework for local motion planning and trajectory optimization.
 
 
 \chapter{Thing mobile manipulator}\label{chapter:thing}
-The Thing mobile manipulator is composed of a Ridgeback omni-directional platform and a UR10 manipulator arm equipped with a Robotiq 3-Finger Adaptive Robot Gripper is used as the end-effector.
-The three systems are essentially separate on the lower level: the RIdgeback, UR10 and Robotiq gripper local hardware interfaces are electronically independent self-contained systems.
-These local interfaces are unified on a higher level by the Ridgeback's computer operating as a server running the Robot Operating System (ROS).
+The Thing mobile manipulator (\autoref{figure:thing}) is composed of a Ridgeback omni-directional platform and a UR10 manipulator arm with a Robotiq 3-Finger Adaptive Robot Gripper in place of the end-effector.
+The three systems are essentially separate on the lower level: the Ridgeback, UR10 and Robotiq gripper local hardware interfaces are electronically independent self-contained systems.
+These local interfaces are unified by the Ridgeback's computer, which operates as a server under the Robot Operating System (ROS).
+This interfacing strategy provides all the advantages of distributed computing, such as networked control or information sharing.
 \begin{figure}[h]
-\label{figure:thing}
 \centering
 \includegraphics[scale=0.045]{thing_segmented_trans}
-\caption{The Ridgeback mobile platform}
+\caption{The Thing mobile manipulator}
+\label{figure:thing}
 \end{figure}
-This platform is also equipped with a vast array of sensors (some not shown in \ref{figure:thing}), making it ideal for autonomy research in robotics. 
-The Ridgeback platform is outfitted with a Hokuyo laser range finder (LIDAR) and Kinect2 camera , giving valuable perception capabilities.
-The omni-directional drive enables field-of-view (FOV) control independent of both end-effector pose and base position, making it an interesting plaform for active perception research.
-The UR10 manipulatoris equipped with the advanced FT300 force-torque sensor and an Intel Realsense camera mounted on the gripper.
+This platform is also equipped with a vast array of sensors, making it ideal for autonomous robotics research.
+The Ridgeback platform is outfitted with a Hokuyo laser range finder (LIDAR) and Kinect2 camera , extending both planar and spatial perception capabilities.
+The omni-directional drive enables field-of-view (FOV) control independent of both end-effector pose and base position, making it an interesting platform for active perception research.
+The UR10 manipulator is equipped with the FT300 force-torque sensor and an Intel Realsense camera mounted on the gripper, further increasing perception capabilities.
 \section{Ridgeback} 
-Ridgeback is a midsize indoor robot platform that uses an omni-drive to move manipulators and heavy payloads with minimal constraints. 
-The omnidirectional base provides precision positioning in constrained environments and comes fully integrated with onboard computer, front laser scanner and an IMU. 
+The Ridgeback (\autoref{fig:ridgeback}) is a midsize indoor robot platform that uses an omni-drive to move manipulators and heavy payloads with minimal constraints. 
+The omnidirectional base provides precision positioning in constrained environments and comes fully integrated with on-board computer, front laser range finder and an IMU. 
 Ridgeback offers native ROS and Gazebo integration and is compatible with a wide range of robot accessories.
 \begin{figure*}[h]
     \centering
@@ -110,22 +112,49 @@ Ridgeback offers native ROS and Gazebo integration and is compatible with a wide
     \end{subfigure}
     \caption{The Ridgeback mobile platform}\label{fig:ridgeback}
 \end{figure*}
-It is primarily designed for warehouseing applications as it is highly flexible in a controlled flat environment.
-The built in wheel odometry provides accurate local position estimates, with drift accumulating very slowly.
+It is primarily designed for warehousing applications as it is highly flexible in a controlled flat environment.
+The built in wheel odometry provides accurate local position estimates, with pose drift accumulating very slowly.
 For improved localization and obstacle avoidance, the navigation stack ROS package provides SLAM capability using the on-board LIDAR and IMU.
-%\begin{table}[]
-%\centering
-%\caption{Ridgeback specifications}
-%\label{table:ridgeback specs}
-%\begin{tabular}{@{}lll@{}}
-%\toprule
-%\textbf{Weight}&  135 kg& \\ \midrule
-%\textbf{Payload}& 100 kg&  \\ \midrule
-%\textbf{Speed}&  1.1 m/s&\\ \bottomrule
-%\end{tabular}
-%\end{table}
 
-\subsection{Hokuyo LIDAR}
+In a controlled laboratory setting, this platform enables a high degree of flexibility in research.
+The high load bearing capability enables the platform to carry manipulators (such as the UR10) and large sensor arrays.
+
+\newpage
+\section{UR10} 
+The UR10 is Universal Robotics largest collaborative industrial manipulator.
+It is a full 6DOF robotic arm capable of mimicking human arm movements.
+During operation it can handle weights up to 10 kg, making it viable for a wide range of tasks.
+The provided drivers enable performing collaborative tasks alongside human operators, allowing for easy positioning of the arm through compliant movement and preventing use of excessive force on impact.
+\begin{figure}[h]
+\begin{floatrow}
+    \ffigbox{
+        \includegraphics[width=0.34\textwidth]{ur10_right}
+        }{
+    \caption{The UR10 manipulator}\label{fig:ur10}
+    }
+    \capbtabbox{
+\begin{tabular}{@{}lll@{}}
+\toprule
+\textbf{{ Weight}}&  28.9 kg& \\ \midrule
+\textbf{{Payload}}&  10 kg&  \\ \midrule
+\textbf{{Speed}}&  {\footnotesize Large joints: Max 120$^{\circ}$/s}&  \\
+&  {\footnotesize Wrist joints: Max 180$^{\circ}$/s}&   \\
+&  {\footnotesize Tool: approx 1 m/s}& \\ \midrule
+\textbf{{\small Repeatability}}& $\pm0.01$ mm& \\ \midrule
+\textbf{Power}& average 350 W& \\ \bottomrule
+\end{tabular}
+}{
+\caption{UR10 specifications}
+\label{tab:ur10 specs}
+}
+\end{floatrow}
+\end{figure}
+
+The data in table \autoref{tab:ur10 specs} clearly shows that the UR10 manipulator is meant for tasks involving high precision and light payloads. 
+The repeatability value of $0.01$ mm shows that the UR10 can reach the same pose multiple times with a high degree of accuracy, which is important in industrial applications.
+Additionally, it's light weight and high end-effector modularity make it ideal for research purposes.
+
+\section{Hokuyo LIDAR}
 The Hokuyo UST-10LX Scanning Laser Rangefinder is a small, accurate, high-speed device for obstacle detection and localization of autonomous robots and automated material handling systems. 
 This model uses Ethernet interface for communication and can obtain measurement data in a wide field of view up to a distance of 10 meters with millimeter resolution.
 %\begin{figure*}[t!]
@@ -137,61 +166,29 @@ This model uses Ethernet interface for communication and can obtain measurement 
 %\end{figure*}
 This sensor uses a laser source to scan 270$^\circ$ field of view. Positions of objects in the range are calculated with step angle and distance. Sensor outputs these data through communication channel.
 
-\section{UR10} 
-The UR10 is Universal robotics largest collaborative industrial manipulator.
-It is a full 6DOF robotic arm capable of mimicking human arm movements.
-During operation it can handle weights up to 10 kg, making it viable for a wide range of tasks.
-The provided drivers enable performing collaborative tasks with human operators, allowing for easy positioning of the arm through compliant movement and preventing use of excessive force on impact.wwwww
-\begin{figure*}[h]
+\section{FT300}
+\begin{figure*}[t!]
     \centering
-    \begin{subfigure}[t]{0.34\textwidth}
-        \includegraphics[width=\textwidth]{ur10_right}
-        \caption{Side}
-        %\label{fig:gull}
-    \end{subfigure}
-    \caption{The UR10 manipulator}\label{fig:ur10}
-\end{figure*}
-\begin{table}[]
-\centering
-\caption{UR10 specifications}
-\label{table:ur10 specs}
-\begin{tabular}{@{}lll@{}}
-\toprule
-\textbf{Weight}&  28.9 kg& \\ \midrule
-\textbf{Payload}&  10 kg&  \\ \midrule
-\textbf{Speed}&  Base and Shoulder joints: Max 120$^{\circ}$/s&  \\
-&  All other joints: Max 180$^{\circ}$/s&   \\
-&  Tool: approx 1 m/s& \\ \midrule
-\textbf{Repeatability}& $\pm0.01$ mm& \\ \midrule
-\textbf{Power consumption}& average 350 W& \\ \bottomrule
-\end{tabular}
-\end{table}
-The data in table \ref{table:ur10 specs} clearly shows that the UR10 manipulator is meant for tasks involving high precision and light payloads. 
-The repeatability value of $0.01$ mm shows that the UR10 can reach the same pose multiple times with a high degree of accuracy, which is important in industrial applications.
-Additionally, it's light weight and high end-effector modularity make it ideal for research purposes.
-
-\subsection{FT300}
-The UR10 on the Thing mobile manipulator has a variety of sensors built-in for use in various tasks.
-One such sensor is the FT300 force-torque sensor by Robotiq.
-In terms of mechanical fit, the Sensor has an embedded coupling to fit directly on the UR wrist. The tool side of the Sensor matches the UR bolt pattern. 
-It-s application range from impedance control to perception and contact calibration of the manipulator.
-\begin{figure*}[h,t!]
-    \centering
-        \begin{subfigure}[t]{0.34\textwidth}
+        \begin{subfigure}[h,t]{0.34\textwidth}
         \includegraphics[clip, trim=0cm 5cm 0cm 5cm, width=\textwidth]{FT300_pic}
         \caption{Front}
         %\label{fig:gull}
     \end{subfigure}
     ~
-    \begin{subfigure}[t]{0.34\textwidth}
+    \begin{subfigure}[h,t]{0.34\textwidth}
         \includegraphics[width=\textwidth]{FT300}
         \caption{Side}
         %\label{fig:gull}
     \end{subfigure}
     \caption{The FT300 force-torque sensor}\label{fig:FT300}
 \end{figure*}
+The UR10 on the Thing mobile manipulator has a variety of sensors built-in for use in various tasks.
+One such sensor is the FT300 force-torque sensor by Robotiq.
+In terms of mechanical fit, the Sensor has an embedded coupling to fit directly on the UR wrist. The tool side of the Sensor matches the UR bolt pattern. 
+It-s application range from impedance control to perception and contact calibration of the manipulator.
 
-\subsection{Robotiq Gripper}
+
+\section{Robotiq Gripper}
 \begin{figure}[h]
 \centering
 \includegraphics[width=0.3\textwidth]{robotiq}
@@ -230,9 +227,9 @@ Estimating the base state (\textit{localization}) is a more complex problem; the
 Consequently, in addition to kinematic models we have to rely on movement estimates from sensor data which is inherently noisy.
 The imperfect model and sensor data are fused in a single estimate using a probabilistic framework.
 
-In this chapter, we first define our state of interest (as seen in Fig~\ref{figure:thing states}) in section \ref{section:State}. 
-Section~\ref{section:Kinematics} contains details on the derivation of the kinematic model used in end-effector state estimation assuming sufficient knowledge of the base pose. 
-The probabilistic framework used for estimating the base state is described in section \ref{section:Localization}, where wheel and LIDAR odometry are fused to provide an accurate estimate.
+In this chapter, we first define our state of interest (as seen in \autoref{figure:thing states}) in \autoref{section:State}. 
+Section \ref{section:Kinematics} contains details on the derivation of the kinematic model used in end-effector state estimation assuming sufficient knowledge of the base pose. 
+The probabilistic framework used for estimating the base state is described in \autoref{section:Localization}, where wheel and LIDAR odometry are fused to provide an accurate estimate.
 %The focus of this chapter is estimating the pose of the end-effector and mobile base, but the methods are extendable to any frame on the platform.
 
 \section{State}\label{section:State}
@@ -245,16 +242,17 @@ T_{k-1}^k =
 R & p\\
 0 & 1\\
 \end{bmatrix}\,.
-\label{transform}
+\label{eq:transform}
 \end{align}
 The rotation matrix $R \in \mathbb{R}^{3x3}$ represents the orientation of the frame $k$ relative to the frame $k-1 $, while translation is represented by the vector $p \in \mathbb{R}^3$.
 Estimating the matrix $T$ for the end-effector is a 9-dimensional problem which can be further reduced. 
 It is possible to fully define it the vector $r$ consisting of the translation vector $p$ and a \textit{quaternion} $q$
-\begin{align} \label{eq:pose}
+\begin{align} 
 r_{EE}\left(T_{0}^{EE}\right) = 
 \begin{bmatrix}
 x& y& z& q_w& q_x& q_y& q_z
 \end{bmatrix}^T\, .
+\label{eq:pose}
 \end{align}
 The number of dimensions can also be reduced for the base, as it moves on a 2D plane and thus only rotates alongside one axis and has a constant $z$ coordinate
 \begin{align}\label{eq:pose base}
@@ -291,7 +289,7 @@ q =
 q_0& q_1& q_2& q_3& q_4& q_5& \hat{x}& \hat{y}& \hat{\theta}
 \end{bmatrix}^T \quad .
 \end{align}
-The equations are commonly derived using the transforms defined in \eqref{transform}.
+The equations are commonly derived using the transforms defined in \eqref{eq:transform}.
 The transform between two frames can be defined as a function of only four parameters using the Denavit-Hartenberg notation \citep{uicker1964iterative}.
 \begin{align}
 T_{k-1}^k(d, \ \theta, \ a, \ \alpha)
@@ -302,10 +300,10 @@ T_{k-1}^k(d, \ \theta, \ a, \ \alpha)
 0 & \sin\alpha_{k} & \cos\alpha_{k} & d_{k}\\
 0 & 0 & 0 & 1\\
 \end{bmatrix} \quad .
-\label{homogenous}
+\label{eq:homogenous}
 \end{align}
 The parameters $a, \alpha$ are usually constant and represent the structure, while $d, \theta$ represent the prismatic and rotational joint values and biases.
-Using the DH parameters as defined in table \ref{DH}, we derive all the transforms \eqref{homogenous} from global frame to the end effector frame.
+Using the DH parameters as defined in \autoref{DH}, we derive all the transforms \eqref{eq:homogenous} from global frame to the end effector frame.
 Multiplying these transforms gives us the transform from the global frame to any frame of the mobile manipulator
 \begin{equation}
 T_{0}^{EE} = \prod_{k=1}^{N_{EE}} T_{k-1}^{k} \quad .
@@ -319,7 +317,7 @@ every $q$ corresponds to a single pose $T$, even though a given $T$ might corres
 The analytic formulation of the transform from the global frame to the end-effector can be found in the appendix.
 
 \subsection{Differential forward kinematics}
-Equations defined in \ref{subsection:FK} provide an estimate of the mobile manipulator state \eqref{eq:task_vector} using the configuration vector $q$. 
+Equations defined in \autoref{subsection:FK} provide an estimate of the mobile manipulator state \eqref{eq:task_vector} using the configuration vector $q$. 
 However, algorithms used in motion planning and trajectory optimization require an estimate on how configuration change affects the state.
 This information is contained within the manipulator Jacobian $J$.
 We define the Jacobian $J$ as the derivative of the function $f\left(x\right) \ : \mathbb{R}^n \rightarrow \mathbb{R}^k $ with respect to the vector $x$.
@@ -336,7 +334,7 @@ Now $\dot{f}$ can be calculated by multiplying the matrix with $\dot{x}$
 \begin{align} \label{eq:jacobian_identity}
 \dot{f} = J \dot{x}
 \end{align}
-For a sufficiently small $\Delta$, equation \ref{eq:jacobian_identity} can be extended to produce a first order approximation $\hat{f}_k$ 
+For a sufficiently small $\Delta$, \eqref{eq:jacobian_identity} can be extended to produce a first order approximation $\hat{f}_k$ 
 \begin{align} \label{eq:jacobian_estimate}
 \hat{f}_k = f_{k-1} + J\left(x_{k} - x_{k-1}\right)
 \end{align}
@@ -344,7 +342,7 @@ This framework can be employed in various state estimation and motion planning a
 \newpage
 \subsubsection{End-effector Jacobian}
 For motion planning applications, an estimate on how configuration change affects the end-effector pose $\Delta r_{EE}$ is vital.
-The end-effector Jacobian is defined as the derivative of the end-effector pose \ref{eq:pose} with respect to the configuration vector $q$.
+The end-effector Jacobian is defined as the derivative of the end-effector pose \eqref{eq:pose} with respect to the configuration vector $q$.
 While it can be derived analytically, it is often advantageous to derive it using the geometry of the chain.
 Here the Jacobian takes the form 
 \begin{equation}
@@ -368,24 +366,24 @@ For prismatic joints the orientation component is $J_{\omega_j} = 0$, while the 
 \begin{equation}
 J_{v_j} = \dfrac{\partial p}{ \partial q_j} = z_j\, .
 \end{equation}
-As seen in Algorithm~\ref{algorithm:jacobian calc}, the geometric derivation is suitable for software implementation as it does not require symbolic calculations and relies only on matrix operations.
+As seen in \autoref{algorithm:jacobian calc}, the geometric derivation is suitable for software implementation as it does not require symbolic calculations and relies only on matrix operations.
 \begin{algorithm}[h]
  \KwData{Kinematic chain transforms $T_{i}$ and joint type flags $rev_i$} 
  \KwResult{End-effector Jacobian matrix $J$}
  $T=I$\;
  \For{$i = 1, 2, ..., N$}{
- $T = TT_{i}$\;
+ $T = TT_{i}$\tcc*[r]{get next transform}
  $R_i = R(T)$\;
  $O_{i} = O(T)$\;
- \eIf{$i = 1$}{
+ \eIf(\tcc*[h]{element corresponding to the base joint}){$i = 1$}{
  	$z_i = (rev_i)\mathbf{1}$\;
  	$v_i = (rev_i)z_i \times w + (1-rev_i)z_i$\;
- }{
+ }(\tcc*[h]{all subsequent joints}){
   	$z_i = (rev_i)R_{i-1}\begin{bmatrix}0& 0& 1\end{bmatrix}^T$\;
  	$v_i = (rev_i)z_i \times (r - O_{i-1}) + (1-rev_i)z_i$\;
  }
  }
- $J = \begin{bmatrix}v &z \end{bmatrix}^T$
+ $J = \begin{bmatrix}v &z \end{bmatrix}^T$ \tcc*[r]{compose the Jacobian}
  \caption{Geometric Jacobian calculation}
  \label{algorithm:jacobian calc}
 \end{algorithm}
@@ -418,7 +416,7 @@ L = - 0.5 \left(\left[n_c\right]_{\times}\left[n_d\right]_{\times} + \left[s_c\r
 \end{subequations}
 Plainly stated, this is the equivalent of angular velocity defined by two different orientations.
 \section{Localization}\label{section:Localization}
-When using the kinematic model in \ref{section:Kinematics} sufficiently accurate base pose estimates $\hat{x},\hat{y},\hat{\theta}$ are assumed.
+When using the kinematic model in \autoref{section:Kinematics} sufficiently accurate base pose estimates $\hat{x},\hat{y},\hat{\theta}$ are assumed.
 In reality, obtaining accurate pose estimates is non-trivial and often requires fusing sensor data while taking in to account the probabilistic nature of measurements.
 
 Localization of the Thing mobile manipulator employs a motion model of the omni-directional drive on the Ridgeback and data provided by the LIDAR.
@@ -526,13 +524,13 @@ It is also important to note that the EKF assumes white Gaussian noise and thus 
 
 
 \chapter{Motion planning}\label{chapter:motion planning}
-As mentioned in chapter \ref{chapter:State estimation}, the primary motion planning objective consists of reaching the desired pose with the end-effector and mobile base.
+As mentioned in \autoref{chapter:State estimation}, the primary motion planning objective consists of reaching the desired pose with the end-effector and mobile base.
 However, moving the mobile manipulator safely and efficiently in the workspace is more involved and significantly constrains the primary objective. 
 For instance, it is important to maintain distance from obstacles both with the platform and the manipulator.
 Additionally, various other performance metrics exist which may need to be maximized or maintained above a certain value.
 These objectives and constraints can be formalized in a way that fits the motion planning problem.
 
-In section \ref{section:inverse kinematics} the \textit{inverse kinematics} problem is considered for mobile manipulator.
+In \autoref{section:inverse kinematics} the \textit{inverse kinematics} problem is considered for mobile manipulator.
 This involves finding an configuration $q$ that corresponds to a given end-effector pose $r$.
 Section \ref{section:redundancy resolution} explores the problem of utilizing the extra degrees of freedom of the system to optimize movement, also referred to as \textit{redundancy resolution}.
 The remaining sections explore two different approaches to redundancy resolution: \textit{task-priority} and s\textit{equential convex optimization}. 
@@ -557,12 +555,12 @@ In an inverse differential kinematics scheme used for redundant kinematic chains
 \label{diffik_1}
 \frac{\partial}{\partial q}f = -\lambda_{f}f\left(q\right), \lambda_{f} > 0 \, .
 \end{align}
-The solution to \ref{diffik_1} is often rank-deficient, so a least squares formulation is employed
+The solution to \eqref{diffik_1} is often rank-deficient, so a least squares formulation is employed
 \begin{align}
 \label{diffik_2}
 \min\limits_{\dot{q}} & \frac{1}{2}\left\Vert\frac{\partial f}{\partial q} \dot{q} + \lambda_{f}f\left(q\right)\right\Vert^2, \lambda_{f} > 0 \, .
 \end{align}
-Letting $J = \frac{\partial f}{\partial q}$ and $a = -\lambda_{f}f\left(q\right)$, the solution to \ref{diffik_2} that minimizes the $L_{2}$ norm is given by finding the pseudoinverse of the $A$ matrix
+Letting $J = \frac{\partial f}{\partial q}$ and $a = -\lambda_{f}f\left(q\right)$, the solution to \eqref{diffik_2} that minimizes the $L_{2}$ norm is given by finding the pseudoinverse of the $A$ matrix
 \begin{align}
 \label{diffik_4}
 \dot{q} = J^{\dagger}a  \, .
@@ -612,7 +610,7 @@ This results in a new Jacobian matrix
 \end{align}
 Authors report that combining this filtering method with any of the above pseudoinverse approaches results in higher stability.
 \section{Redundancy resolution}\label{section:redundancy resolution}
-Given that the valid set of solutions to \ref{diffik_2} is in an affine subspace $\mathcal{F} \in \mathbb{R}^n$, the minimization scheme for solving a lower priority set of tasks would be
+Given that the valid set of solutions to \eqref{diffik_2} is in an affine subspace $\mathcal{F} \in \mathbb{R}^n$, the minimization scheme for solving a lower priority set of tasks would be
 \begin{align}
 \label{diffik_3}
 \min\limits_{\dot{q} \in \mathcal{F}} & \frac{1}{2}\left\Vert\frac{\partial g}{\partial q} \dot{q} + \lambda_{g}f\left(q\right)\right\Vert^2 , \lambda_{g} > 0\, .
@@ -647,7 +645,7 @@ Here the trade-off is lower accuracy and slower convergence because the expressi
 The motion planning scheme implemented using the task priority formulation is focused on simplicity and robustness rather than optimal movement.
 The primary task is reaching a goal pose with the end effector, which is vital for most mobile manipulator applications. 
 The secondary task handles mobile base trajectory following.
-As mentioned in \ref{section:task priority}, this framework can be extended to any number of tasks, but the increasing numerical instability results in diminishing returns.
+As mentioned in \autoref{section:task priority}, this framework can be extended to any number of tasks, but the increasing numerical instability results in diminishing returns.
 \begin{align}
 \label{rresolution_3}
 \Delta q \approx J_{EE}^{\dagger}\Delta r_{EE} + \left(I - J_{EE}^{\dagger}J_{EE}\right)J_{B}^{\dagger}\Delta r_{B}\, .
@@ -830,7 +828,7 @@ Otherwise, the penalty $\mu$ is increased (usually by a degree of magnitude) and
    \textbf{break}\;
    }
  }
-  \eIf{$SatisfiesConstraints$}{
+  \eIf(\tcc*[h]{Check nonlinear constraints}){$SatisfiesConstraints$}{
  \textbf{return} $q$\;
  }{
  $\mu = k*\mu$\;
@@ -850,14 +848,14 @@ Otherwise, the penalty $\mu$ is increased (usually by a degree of magnitude) and
 
 
 \chapter{Software architecture}
-With the theoretical framework for state estimation and motion planning established in chapters \ref{chapter:State estimation} and \ref{chapter:motion planning}, this chapter describes the software implementation of these ideas.
+With the theoretical framework for state estimation and motion planning established in \autoref{chapter:State estimation} and \autoref{chapter:motion planning}, this chapter describes the software implementation of these ideas.
 Developing code that is intuitively structured is key in a research context, where it is often maintained and expanded by multiple parties.
 Maintaining a heavily tested core code-base which allows modular drop-in components for high level functions is an optimal development strategy for such cases.
 Such a structure expedites testing and data gathering procedures, as it enables quick start-up, user safety and damage prevention.
 
-In section \ref{section:overview} development considerations are explained in more detail and a high-level overview of the software architecture is presented.
-Next, in \ref{section:code state estimation} and \ref{section:code motion planning} state estimation and motion planning pipelines are presented in more detail.%, focusing on the modularity aspect.
-Lastly, section \ref{section:control} describes the control pipeline that relays user commands to the API and internal control loops. %%Due to closed-source control code being used in the robots internally, we omit the details of the algorithms themselves in lieu of explaining interfacing strategies with the low-level APIs.
+In \autoref{section:overview} development considerations are explained in more detail and a high-level overview of the software architecture is presented.
+Next, in \autoref{section:code state estimation} and \autoref{section:code motion planning} state estimation and motion planning pipelines are presented in more detail.%, focusing on the modularity aspect.
+Lastly, \autoref{section:control} describes the control pipeline that relays user commands to the API and internal control loops. %%Due to closed-source control code being used in the robots internally, we omit the details of the algorithms themselves in lieu of explaining interfacing strategies with the low-level APIs.
 
 \section{Overview}\label{section:overview}
 Developing software for a complex system such as the Thing mobile manipulator is a time-consuming process, as each change requires extensive testing before it can be applied safely.
@@ -879,7 +877,7 @@ Task-specific programs are ran on a separate machine or client which connects to
 \end{figure} 
 
 \subsubsection{Client}
-Figure \ref{fig:overview} shows how the \verb|thing_control| package forms a robust core of the code-base.
+\autoref{fig:overview} shows how the \verb|thing_control| package forms a robust core of the code-base.
 It acts as a central node which processes trajectories and commands sent by the user, which includes:
 \begin{itemize}
   \item Receiving and processing data streams from the robot
@@ -900,7 +898,7 @@ This library contains the common mathematical framework for the motion planners 
 \end{itemize}
 Keeping this part of code in library form allows for easy transfer of these useful functionalities to other packages.
 The motion planners (also referred to as \textit{solvers}) represent different approaches to the problem of solving a given Cartesian trajectory.
-Both the methods presented in \ref{section:task priority}, \ref{section:sqp} are implemented as motion planning libraries.
+Both the methods presented in \autoref{section:task priority}, \autoref{section:sqp} are implemented as motion planning libraries.
 
 \subsubsection{Server}
 The computer located on the robot itself or server maintains the control and estimation pipeline on the robot and takes care of publishing the current state and status to the network.
@@ -912,13 +910,13 @@ The transforms representing all of the chains located in the robots URDF\footnot
 The package is launched on the robot's local machine since the standardized structure of the control pipeline relies on the transforms published by this package.
 
 \section{State estimation}\label{section:code state estimation}
-The EKF algorithm described in \ref{section:Localization} is available as a component of the \verb|robot_localization| package \citep{MooreStouchKeneralizedEkf2014}.
+The EKF algorithm described in \autoref{section:Localization} is available as a component of the \verb|robot_localization| package \citep{MooreStouchKeneralizedEkf2014}.
 This package fuses odometry estimates provided by various sources, ideally resulting in a higher-accuracy estimate.
 The estimates need to be published to a ROS topic in the form of a \verb|nav_msgs/odometry| message.
 Each state estimation node in \verb|robot_localization| begins estimating the vehicle’s state as soon as it receives a single measurement. If there is a holiday in the sensor data (i.e., a long period in which no data is received), the filter will continue to estimate the robot’s state via an internal motion model.
 
 \section{Motion planning}\label{section:code motion planning}
-Two motion planning algorithm have been developed, one implementing the \textit{task-priority} (\ref{section:task priority}) scheme and the other implementing the scheme in \ref{mnptik_2} cia the SQP (\ref{section:sqp}) algorithm.
+Two motion planning algorithm have been developed, one implementing the \textit{task-priority} (\autoref{section:task priority}) scheme and the other implementing the scheme in \eqref{mnptik_2} via the SQP (\autoref{section:sqp}) algorithm.
 
 Unifying the implementations is a common linear algebra framework, the Eigen3\footnote{http://eigen.tuxfamily.org/index.php?title=Main\_ Page} library.
 The Eigen3 library is a powerful linear algebra toolbox capable of handling a vast array of dense and sparse matrix calculations.
@@ -938,12 +936,13 @@ Ceres is configured to run using the Levenberg-Marquardt trust-region strategy w
 The underlying control architecture of the Thing mobile manipulator relies heavily on the internal APIs of both the UR10 and Ridgeback.
 Thus, the main challenge in implementing the software architecture lies integration of control inputs and outputs rather than parametrization of a control loop.
 The \verb|ros_control| package functions as an integration tool for robot APIs into the networked structure of ROS-based systems.
-\begin{figure}\label{fig:ros control}
+\begin{figure}
 \centering
 \includegraphics[width=0.9\textwidth]{ros_control}
 \caption{Scheme of ros\_ control functionalities}
+\label{fig:ros control}
 \end{figure}
-The \verb|hardware_interface| \ref{fig:ros control} class is used to wrap the read and write methods of the respective APIs in to function handles. 
+The \verb|hardware_interface| (\autoref{fig:ros control}) class is used to wrap the read and write methods of the respective APIs in to function handles. 
 These handles can then be used by a selection of controllers within the package to either forward commands or implement a control loop.
 A ros controller has many types and is configured using a yaml file. 
 Depending on the interface, this controller will forward commands or actually control the signal using tunable PID parameters.
@@ -985,20 +984,25 @@ Furthermore, the \verb|ros_control| controllers used on the actual robot are als
 %\end{figure}
 
 \subsection{Localization results}
-
-%\begin{figure}[h]
-%\centering
-%\includegraphics[trim={35cm 0cm 0cm 0cm},clip,width=.5\textwidth]{lidar_test1}
-%\caption{Localization test setup}
-%\end{figure}
+\autoref{fig:ekf_localization} shows the results of base localization on  a dataset consisting of manual Ridgeback movement inputs.
+Two variants are compared: the first variant  uses an EKF to achieve fusion of both the wheel and LIDAR odometry, the second variant integrates wheel odometry alone using the EKF only to account for measurement noise.
 \begin{figure}[h]
 \centering
-\includegraphics[width=.75\textwidth]{thing_odometry_lidar}
-\caption{Simulated localization}
+\input{slike/ekf_localization_plot.tex}
+\caption{Comparison of localization using a fusion of wheel and LIDAR odometry (W+L) to the wheel odometry alone (W). The ground truth (GT) is established using the VICON motion capture system.}
+\label{fig:ekf_localization}
 \end{figure}
+Ground truth was established using the VICON motion capture system, which provides millimetre level accuracy.
 
+The results in this dataset are as expected; fusing two odometry sources provides a better motion estimate than using wheel odometry alone. 
+However, this is not always the case as the LIDAR odometry algorithm from \autoref{subsection:lidar_odometry} relies heavily on the number of data points.
+Additionally, the LIDAR odometry algorithm provides covariances that do not always reflect the actual uncertainty of the velocity estimate.
+This can be remedied by using wheel odometry as an initial guess for the optimization algorithm.
+The estimate should then remain close to that of the wheel odometry in environments with a low number of data points.
 
-
+%\begin{figure}
+%\input{slike/plot.tex}
+%\end{figure}
 
 
 
@@ -1011,39 +1015,24 @@ Conclusion.
 \appendix
 \chapter{DH parameters}
 \begin{table}
-\begin{align}
-\label{DH}
- \begin{tabular}{|c|c|c|c|c|}
-  \hline
- Link& $d_i$& $\theta_i$& $a_i$ & $\alpha_i$\\
-\hline
- 1 & $0$ & $\frac{\pi}{2}$ & $0$& $\frac{\pi}{2}$\\
-  \hline
- 2 & $q_x$ & $\frac{\pi}{2}$ & $0$& $\frac{\pi}{2}$\\
-  \hline
- 3 & $q_y$ & $\frac{\pi}{2}$ & $0$& $\frac{\pi}{2}$\\
-  \hline
- 4 & $0$ &$q_{\theta}$ & 0& 0\\
-  \hline
- 5 & $0.653$ & $0$ & 0.27& 0\\
-   \hline
- 6 & $0$ & $\frac{\pi}{2}$ & 0.01& 0\\
-   \hline
- 7 & $0.1273$ & $q_0$ & 0& $\frac{\pi}{2}$\\
-   \hline
- 8 & $0$ & $q_1$ & -0.612& 0\\
-   \hline
- 9 & $0$ & $q_2$ & -0.5723& 0\\
-  \hline
- 10 & $ 0.163941$ & $q_3$ & 0& $\frac{\pi}{2}$\\
-  \hline
- 11 & $0.1157$ & $q_4$ & 0& $-\frac{\pi}{2}$\\
-  \hline
- 12 & $0.0922$ & $q_5$ & 0& 0\\
-  \hline
- \end{tabular}
-\end{align}
 \caption{Thing's DH parameters}
+ \begin{tabular}{@{}ccccc@{}}
+  \toprule
+ \textbf{Link}& $d_i$& $\theta_i$& $a_i$ & $\alpha_i$\\ \midrule \midrule
+ \textbf{1} & $0$ & $\frac{\pi}{2}$ & $0$& $\frac{\pi}{2}$\\ \midrule
+ \textbf{2} & $q_x$ & $\frac{\pi}{2}$ & $0$& $\frac{\pi}{2}$\\ \midrule
+ \textbf{3} & $q_y$ & $\frac{\pi}{2}$ & $0$& $\frac{\pi}{2}$\\ \midrule
+ \textbf{4} & $0$ &$q_{\theta}$ & 0& 0\\ \midrule
+ \textbf{5} & $0.653$ & $0$ & 0.27& 0\\ \midrule
+ \textbf{6} & $0$ & $\frac{\pi}{2}$ & 0.01& 0\\ \midrule
+ \textbf{7} & $0.1273$ & $q_0$ & 0& $\frac{\pi}{2}$\\ \midrule
+ \textbf{8} & $0$ & $q_1$ & -0.612& 0\\ \midrule
+ \textbf{9} & $0$ & $q_2$ & -0.5723& 0\\ \midrule
+ \textbf{10} & $ 0.163941$ & $q_3$ & 0& $\frac{\pi}{2}$\\ \midrule
+ \textbf{11} & $0.1157$ & $q_4$ & 0& $-\frac{\pi}{2}$\\ \midrule
+ \textbf{12} & $0.0922$ & $q_5$ & 0& 0\\ \bottomrule
+ \end{tabular}
+\label{DH}
 \end{table}
 
 \chapter{Robot operating system}\label{sec:def_ROS}
