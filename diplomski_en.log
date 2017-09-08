@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013/Debian) (format=pdflatex 2017.8.25)  7 SEP 2017 17:05
+This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013/Debian) (format=pdflatex 2017.8.25)  8 SEP 2017 02:02
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1368,7 +1368,7 @@ LaTeX Font Info:    Font shape `T1/ptm/bx/n' in size <24.88> not available
 
 ] [2]
 Chapter 2.
-<./slike/thing_segmented_trans.png, id=288, 2760.3125pt x 4628.29124pt>
+<./slike/thing_segmented_trans.png, id=258, 2760.3125pt x 4628.29124pt>
 File: ./slike/thing_segmented_trans.png Graphic file (type png)
 
 <use ./slike/thing_segmented_trans.png>
@@ -1380,27 +1380,27 @@ LaTeX Font Info:    Font shape `T1/ptm/bx/n' in size <10.95> not available
 LaTeX Font Info:    Font shape `T1/ptm/bx/n' in size <17.28> not available
 (Font)              Font shape `T1/ptm/b/n' tried instead on input line 82.
 
-<./slike/rb_front.jpg, id=291, 523.9575pt x 371.3875pt>
+<./slike/rb_front.jpg, id=261, 523.9575pt x 371.3875pt>
 File: ./slike/rb_front.jpg Graphic file (type jpg)
 
 <use ./slike/rb_front.jpg>
 Package pdftex.def Info: ./slike/rb_front.jpg used on input line 89.
 (pdftex.def)             Requested size: 149.94441pt x 106.28288pt.
 
-<./slike/rb_side.jpg, id=292, 523.9575pt x 371.3875pt>
+<./slike/rb_side.jpg, id=262, 523.9575pt x 371.3875pt>
 File: ./slike/rb_side.jpg Graphic file (type jpg)
 
 <use ./slike/rb_side.jpg>
 Package pdftex.def Info: ./slike/rb_side.jpg used on input line 95.
 (pdftex.def)             Requested size: 149.94441pt x 106.28288pt.
 
-<./slike/rb_top.jpg, id=293, 523.9575pt x 371.3875pt>
+<./slike/rb_top.jpg, id=263, 523.9575pt x 371.3875pt>
 File: ./slike/rb_top.jpg Graphic file (type jpg)
  <use ./slike/rb_top.jpg>
 Package pdftex.def Info: ./slike/rb_top.jpg used on input line 102.
 (pdftex.def)             Requested size: 149.94441pt x 106.28288pt.
 
-<./slike/ridgeback.png, id=294, 1606.0pt x 1204.5pt>
+<./slike/ridgeback.png, id=264, 1606.0pt x 1204.5pt>
 File: ./slike/ridgeback.png Graphic file (type png)
 
 <use ./slike/ridgeback.png>
@@ -1410,7 +1410,7 @@ Package pdftex.def Info: ./slike/ridgeback.png used on input line 109.
 
  <./slike/thing_segmented_trans.png>] [4 <./slike/rb_front.jpg> <./slike/rb_sid
 e.jpg> <./slike/rb_top.jpg> <./slike/ridgeback.png>] <./slike/ur10_right.png, i
-d=307, 1254.6875pt x 1107.13625pt>
+d=277, 1254.6875pt x 1107.13625pt>
 File: ./slike/ur10_right.png Graphic file (type png)
 
 <use ./slike/ur10_right.png>
@@ -1421,20 +1421,20 @@ File: ./slike/ur10_right.png Graphic file (type png)
 Package pdftex.def Info: ./slike/ur10_right.png used on input line 134.
 (pdftex.def)             Requested size: 149.94441pt x 132.31001pt.
 
-<./slike/FT300_pic.jpg, id=309, 1084.05pt x 1084.05pt>
+<./slike/FT300_pic.jpg, id=279, 1084.05pt x 1084.05pt>
 File: ./slike/FT300_pic.jpg Graphic file (type jpg)
 
 <use ./slike/FT300_pic.jpg>
 Package pdftex.def Info: ./slike/FT300_pic.jpg used on input line 173.
 (pdftex.def)             Requested size: 149.94441pt x 110.5782pt.
- <./slike/FT300.png, id=311, 803.0pt x 602.25pt>
+ <./slike/FT300.png, id=281, 803.0pt x 602.25pt>
 File: ./slike/FT300.png Graphic file (type png)
 
 <use ./slike/FT300.png>
 Package pdftex.def Info: ./slike/FT300.png used on input line 179.
 (pdftex.def)             Requested size: 149.94441pt x 112.45293pt.
  [5 <./slike/ur10_right.png>]
-<./slike/robotiq.png, id=323, 1204.5pt x 803.0pt>
+<./slike/robotiq.png, id=293, 1204.5pt x 803.0pt>
 File: ./slike/robotiq.png Graphic file (type png)
  <use ./slike/robotiq.png>
 Package pdftex.def Info: ./slike/robotiq.png used on input line 194.
@@ -1442,7 +1442,7 @@ Package pdftex.def Info: ./slike/robotiq.png used on input line 194.
 
 [6 <./slike/FT300_pic.jpg> <./slike/FT300.png> <./slike/robotiq.png>]
 Chapter 3.
-<./slike/Thingtr.pdf, id=337, 420.48pt x 536.55002pt>
+<./slike/Thingtr.pdf, id=306, 420.48pt x 536.55002pt>
 File: ./slike/Thingtr.pdf Graphic file (type pdf)
 
 <use ./slike/Thingtr.pdf>
@@ -1453,7 +1453,11 @@ Package pdftex.def Info: ./slike/Thingtr.pdf used on input line 218.
  <./slike/Thingtr.pdf>] [8]
 LaTeX Font Info:    Font shape `T1/ptm/bx/n' in size <14.4> not available
 (Font)              Font shape `T1/ptm/b/n' tried instead on input line 284.
- [9] [10]
+
+
+LaTeX Warning: Reference `DH' on page 9 undefined on input line 306.
+
+[9] [10]
 LaTeX Font Info:    Font shape `T1/ptm/bx/n' in size <8> not available
 (Font)              Font shape `T1/ptm/b/n' tried instead on input line 373.
 
@@ -1515,7 +1519,7 @@ Overfull \hbox (56.90616pt too wide) in paragraph at lines 913--917
 le as a com-po-nent of the []\T1/pcr/m/n/12 robot_localization
  []
 
-[26] [27] <./slike/ros_control.png, id=712, 455.2441pt x 351.67606pt>
+[26] [27] <./slike/ros_control.png, id=680, 455.2441pt x 351.67606pt>
 File: ./slike/ros_control.png Graphic file (type png)
 
 <use ./slike/ros_control.png>
@@ -1523,57 +1527,79 @@ Package pdftex.def Info: ./slike/ros_control.png used on input line 941.
 (pdftex.def)             Requested size: 396.91325pt x 306.62645pt.
  [28 <./slike/ros_control.png>]
 Chapter 6.
-<./slike/lidar_test1.jpg, id=719, 4673.46pt x 2629.825pt>
+<./slike/lidar_test1.jpg, id=687, 4673.46pt x 2629.825pt>
 File: ./slike/lidar_test1.jpg Graphic file (type jpg)
 
 <use ./slike/lidar_test1.jpg>
 Package pdftex.def Info: ./slike/lidar_test1.jpg used on input line 961.
 (pdftex.def)             Requested size: 198.45662pt x 141.89206pt.
 
-<./slike/gazebo_screenshot1.png, id=721, 2825.55624pt x 1601.985pt>
+<./slike/gazebo_screenshot1.png, id=689, 2825.55624pt x 1601.985pt>
 File: ./slike/gazebo_screenshot1.png Graphic file (type png)
 
 <use ./slike/gazebo_screenshot1.png>
 Package pdftex.def Info: ./slike/gazebo_screenshot1.png used on input line 966.
 
 (pdftex.def)             Requested size: 198.45662pt x 141.34741pt.
- (./slike/ekf_localization_plot.tex)
-[29
 
- <./slike/lidar_test1.jpg> <./slike/gazebo_screenshot1.png>] [30]
+
+LaTeX Warning: Reference `fig:ekf_localization' on page 29 undefined on input l
+ine 987.
+
+(./slike/ekf_localization_plot.tex) [29
+
+ <./slike/lidar_test1.jpg> <./slike/gazebo_screenshot1.png>] (./slike/mse_local
+ization.tex)
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+[30] [31]
 Chapter 7.
-(./diplomski_en.bbl [31
+(./diplomski_en.bbl [32
 
-] [32
+] [33
 
-] [33]) [34]
+] [34]) [35]
 Chapter A.
-[35
+[36
 
-] [36]
+] [37]
 Chapter B.
-[37
+[38
 
 ]
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 1070.
- [38]
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 1070.
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 1073.
+ [39]
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 1073.
  (./diplomski_en.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 1070.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 1070.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 1073.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 1073.
 
-Package rerunfilecheck Info: File `diplomski_en.out' has not changed.
-(rerunfilecheck)             Checksum: 2A25127264531796D42C04B7A2C815DA;2814.
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 1070.
+
+
+Package rerunfilecheck Warning: File `diplomski_en.out' has changed.
+(rerunfilecheck)                Rerun to get outlines right
+(rerunfilecheck)                or use package `bookmark'.
+
+Package rerunfilecheck Info: Checksums for `diplomski_en.out':
+(rerunfilecheck)             Before: 940B866EF2F0343C630C05CC5E74031F;2484
+(rerunfilecheck)             After:  FE691D3338C48E050E6AD468E25B2370;2814.
+
+LaTeX Warning: There were undefined references.
+
+
+LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
+
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 1073.
  ) 
 Here is how much of TeX's memory you used:
- 30398 strings out of 493304
- 803263 string characters out of 6139871
- 2533365 words of memory out of 5000000
- 32939 multiletter control sequences out of 15000+600000
- 77465 words of font info for 99 fonts, out of 8000000 for 9000
+ 30427 strings out of 493304
+ 1076355 string characters out of 6139871
+ 2165354 words of memory out of 5000000
+ 32963 multiletter control sequences out of 15000+600000
+ 79109 words of font info for 100 fonts, out of 8000000 for 9000
  957 hyphenation exceptions out of 8191
- 76i,23n,92p,54328b,2214s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 76i,23n,87p,68262b,2072s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/usr/share/texlive/texmf-dist/fonts/enc/dvips/base/8r.enc}</usr/share/texliv
 e/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb></usr/share/texlive/texm
 f-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb></usr/share/texlive/texmf-dist
@@ -1594,10 +1620,10 @@ vr8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/times/utmb8a.pfb></usr/
 share/texlive/texmf-dist/fonts/type1/urw/times/utmr8a.pfb></usr/share/texlive/t
 exmf-dist/fonts/type1/urw/times/utmr8a.pfb></usr/share/texlive/texmf-dist/fonts
 /type1/urw/times/utmri8a.pfb>
-Output written on diplomski_en.pdf (43 pages, 20278490 bytes).
+Output written on diplomski_en.pdf (44 pages, 20185942 bytes).
 PDF statistics:
- 900 PDF objects out of 1000 (max. 8388607)
- 800 compressed objects within 8 object streams
- 259 named destinations out of 1000 (max. 500000)
- 452 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 879 PDF objects out of 1000 (max. 8388607)
+ 778 compressed objects within 8 object streams
+ 261 named destinations out of 1000 (max. 500000)
+ 404 words of extra memory for PDF output out of 10000 (max. 10000000)
 

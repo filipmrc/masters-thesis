@@ -1000,9 +1000,12 @@ Additionally, the LIDAR odometry algorithm provides covariances that do not alwa
 This can be remedied by using wheel odometry as an initial guess for the optimization algorithm.
 The estimate should then remain close to that of the wheel odometry in environments with a low number of data points.
 
-%\begin{figure}
-%\input{slike/plot.tex}
-%\end{figure}
+\begin{figure}[h]
+\centering
+\input{slike/mse_localization.tex}
+\caption{The mean-square error }
+\label{fig:mse_localization}
+\end{figure}
 
 
 

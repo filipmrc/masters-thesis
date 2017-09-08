@@ -49,7 +49,7 @@
 \contentsline {section}{\numberline {6.1}Simulation}{29}{section.6.1}
 \contentsline {section}{\numberline {6.2}Real}{30}{section.6.2}
 \contentsline {subsection}{\numberline {6.2.1}Localization results}{30}{subsection.6.2.1}
-\contentsline {chapter}{\numberline {7}Conclusion}{31}{chapter.7}
-\contentsline {chapter}{Bibliography}{32}{chapter*.29}
-\contentsline {chapter}{\numberline {A}DH parameters}{35}{appendix.A}
-\contentsline {chapter}{\numberline {B}Robot operating system}{37}{appendix.B}
+\contentsline {chapter}{\numberline {7}Conclusion}{32}{chapter.7}
+\contentsline {chapter}{Bibliography}{33}{chapter*.30}
+\contentsline {chapter}{\numberline {A}DH parameters}{36}{appendix.A}
+\contentsline {chapter}{\numberline {B}Robot operating system}{38}{appendix.B}
