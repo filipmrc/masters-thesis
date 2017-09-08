@@ -474,7 +474,7 @@ diag\left(0.001,0.001,0.001,100000,100000,0.03\right)\,.
 \subsection{LIDAR odometry}\label{subsection:lidar_odometry}
 A velocity estimate can also be obtained using 
 The Hokuyo LIDAR presents itself as a rich source of information on the environment which can be used to estimate base velocity.
-Various algorithms exist that implement LIDAR odometry, they are mostly based on Iterative Closest Point matching (ICP).
+Various algorithms exist that implement LIDAR odometry, they are mostly based on Iterative Closest Point matching (ICP) \citep{besl1992method}.
 In this work we use the a range flow-based approach available in the form of the \verb|rf2o_laser_odometry| ROS package.
 
 While this work does not cover the details of this algorithm, the formulation is relatively straightforward.
@@ -493,7 +493,7 @@ F\left(\rho\right) &= \frac{k^2}{2}\ln{\left(1 + \left(\frac{\rho}{k}\right)^2\r
 Details on parameters and minimization procedure can be found in \citep{jaimez2016planar}.
 
 \subsection{Extended Kalman filter}
-The wheel and LIDAR odometry data is fused using an Extended Kalman Filter \footnote{EKF in rest of text}\citep{MooreStouchKeneralizedEkf2014}.
+The wheel and LIDAR odometry data is fused using an Extended Kalman Filter \footnote{EKF in rest of text} \citep{fujii2013extended}.
 A process and observation model is used to represent the movement of the Thing mobile manipulator:
 \begin{subequations}\label{state_space_nl2}
 \begin{gather}
@@ -950,7 +950,7 @@ Additionally, we use the joint trajectory controllers which can handle and inter
 
 
 
-\chapter{Results}
+\chapter{Experimental results}
 This chapter covers the results of the presented state estimation and motion planning approaches.
 Since motion planning was considered on a purely kinematic level, it is extensively tested in both simulation and on the real robot.
 State estimation testing proved more difficult as dynamic effects such as slip are not easily simulated.
@@ -976,37 +976,41 @@ The Thing mobile manipulator is simulated using the Gazebo simulator.
 Aside from being open-source, the main advantage of this simulator is that it is fully integrated within the ROS ecosystem.
 Furthermore, the \verb|ros_control| controllers used on the actual robot are also integrated in the Gazebo simulation, expediting the implementation procedure.
 
-\section{Real}
-%\begin{figure}[h]
-%\centering
-%\includegraphics[width=.75\textwidth]{localization1}
-%\caption{Simulated localization}
-%\end{figure}
-
-\subsection{Localization results}
+\section{Localization}
 \autoref{fig:ekf_localization} shows the results of base localization on  a dataset consisting of manual Ridgeback movement inputs.
 Two variants are compared: the first variant  uses an EKF to achieve fusion of both the wheel and LIDAR odometry, the second variant integrates wheel odometry alone using the EKF only to account for measurement noise.
 \begin{figure}[h]
 \centering
 \input{slike/ekf_localization_plot.tex}
-\caption{Comparison of localization using a fusion of wheel and LIDAR odometry (W+L) to the wheel odometry alone (W). The ground truth (GT) is established using the VICON motion capture system.}
+\caption{Localization using a fusion of wheel and LIDAR odometry (W+L) to the wheel odometry alone (W). The ground truth (GT) is established using the VICON motion capture system.}
 \label{fig:ekf_localization}
 \end{figure}
-Ground truth was established using the VICON motion capture system, which provides millimetre level accuracy.
+Ground truth was established using the VICON\footnote{https://www.vicon.com/} motion capture system, which provides sub-millimetre level accuracy.
 
-The results in this dataset are as expected; fusing two odometry sources provides a better motion estimate than using wheel odometry alone. 
-However, this is not always the case as the LIDAR odometry algorithm from \autoref{subsection:lidar_odometry} relies heavily on the number of data points.
-Additionally, the LIDAR odometry algorithm provides covariances that do not always reflect the actual uncertainty of the velocity estimate.
-This can be remedied by using wheel odometry as an initial guess for the optimization algorithm.
-The estimate should then remain close to that of the wheel odometry in environments with a low number of data points.
+The expected result would show that fusing two odometry sources provides a better motion estimate than using wheel odometry alone. 
+However, this might not always be the case as the LIDAR odometry algorithm from \autoref{subsection:lidar_odometry} relies heavily on the number of data points.
+Additionally, the LIDAR odometry algorithm provides a covariance matrix that is associated with the solver and not the uncertainty of the estimate itself.
+This is seen in \ref{fig:mse_localization}, where the mean squared error (MSE) of the position and angle estimates is shown.
+The position MSE of the fused odometry is a slight improvement over the wheel odometry alone, however this depends on the orientation of the vehicle and the number of obstacles the LIDAR is facing.
+Looking at the orientation MSE, it is visible that the fused estimate actually becomes worse than the alternative, which should never happen with an EKF if proper covariances are provided.
 
+In absolute terms , both methods have an increasing MSE that is reasonably low. 
+After 120 seconds of fast erratic movement, the position MSE of $0.05$ [m]$^2$ equates to about $20$ [cm] of error.
+It is the authors opinion that this shows advantages of an holonomic omni-drive over the standard wheeled drives, as a high degree of robustness is shown both in angle and position estimates.
+A global localization source such as a GPS could periodically improve the global estimate, making this amount of odometry error tolerable.
 \begin{figure}[h]
 \centering
 \input{slike/mse_localization.tex}
-\caption{The mean-square error }
+\caption{The mean quared error of the position (top) and orientation (bottom) estimates. }
 \label{fig:mse_localization}
 \end{figure}
 
+The conclusion drawn is that further tuning of the covariance matrix for the LDIAR odometry is necessary.
+Another option would be using an algorithm based on ICP, where a closed-form formulation for covariance is available \citep{censi2007accurate}.
+Further improvements to localization could also be obtained by using more sensors. 
+The Ridgebacks IMU sensor was not available for this work due to hardware problems, but it stands to reason that it would improve the estimate, especially since the wheel odometry + IMU pairing is well researched.
+
+\section{Motion planning}
 
 
 \chapter{Conclusion}

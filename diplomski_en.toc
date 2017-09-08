@@ -45,10 +45,10 @@
 \contentsline {subsection}{\numberline {5.3.1}Task-priority}{27}{subsection.5.3.1}
 \contentsline {subsection}{\numberline {5.3.2}Sequential convex optimization}{27}{subsection.5.3.2}
 \contentsline {section}{\numberline {5.4}Control}{28}{section.5.4}
-\contentsline {chapter}{\numberline {6}Results}{29}{chapter.6}
+\contentsline {chapter}{\numberline {6}Experimental results}{29}{chapter.6}
 \contentsline {section}{\numberline {6.1}Simulation}{29}{section.6.1}
-\contentsline {section}{\numberline {6.2}Real}{30}{section.6.2}
-\contentsline {subsection}{\numberline {6.2.1}Localization results}{30}{subsection.6.2.1}
+\contentsline {section}{\numberline {6.2}Localization}{30}{section.6.2}
+\contentsline {section}{\numberline {6.3}Motion planning}{31}{section.6.3}
 \contentsline {chapter}{\numberline {7}Conclusion}{32}{chapter.7}
 \contentsline {chapter}{Bibliography}{33}{chapter*.30}
 \contentsline {chapter}{\numberline {A}DH parameters}{36}{appendix.A}

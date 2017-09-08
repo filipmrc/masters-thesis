@@ -87,8 +87,9 @@
 \@writefile{toc}{\contentsline {section}{\numberline {3.3}Localization}{12}{section.3.3}}
 \newlabel{section:Localization}{{3.3}{12}{Localization}{section.3.3}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {3.3.1}Wheel odometry}{12}{subsection.3.3.1}}
+\citation{besl1992method}
 \citation{jaimez2016planar}
-\citation{MooreStouchKeneralizedEkf2014}
+\citation{fujii2013extended}
 \newlabel{eq:base vel estimate}{{3.20}{13}{Wheel odometry}{equation.3.3.20}{}}
 \newlabel{eq:wheel_sigma}{{3.21}{13}{Wheel odometry}{equation.3.3.21}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {3.3.2}LIDAR odometry}{13}{subsection.3.3.2}}
@@ -186,7 +187,7 @@
 \newlabel{fig:ros control}{{5.2}{28}{Scheme of ros\_ control functionalities\relax }{figure.caption.26}{}}
 \@writefile{toc}{\contentsline {section}{\numberline {5.4}Control}{28}{section.5.4}}
 \newlabel{section:control}{{5.4}{28}{Control}{section.5.4}{}}
-\@writefile{toc}{\contentsline {chapter}{\numberline {6}Results}{29}{chapter.6}}
+\@writefile{toc}{\contentsline {chapter}{\numberline {6}Experimental results}{29}{chapter.6}}
 \@writefile{lof}{\addvspace {10\p@ }}
 \@writefile{lot}{\addvspace {10\p@ }}
 \@writefile{loa}{\addvspace {10\p@ }}
@@ -197,41 +198,45 @@
 \@writefile{lof}{\contentsline {figure}{\numberline {6.1}{\ignorespaces Example of some real and simulated test setups.\relax }}{29}{figure.caption.27}}
 \newlabel{fig:resultsphotos}{{6.1}{29}{Example of some real and simulated test setups.\relax }{figure.caption.27}{}}
 \@writefile{toc}{\contentsline {section}{\numberline {6.1}Simulation}{29}{section.6.1}}
-\@writefile{toc}{\contentsline {section}{\numberline {6.2}Real}{30}{section.6.2}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {6.2.1}Localization results}{30}{subsection.6.2.1}}
-\@writefile{lof}{\contentsline {figure}{\numberline {6.2}{\ignorespaces Comparison of localization using a fusion of wheel and LIDAR odometry (W+L) to the wheel odometry alone (W). The ground truth (GT) is established using the VICON motion capture system.\relax }}{30}{figure.caption.28}}
-\newlabel{fig:ekf_localization}{{6.2}{30}{Comparison of localization using a fusion of wheel and LIDAR odometry (W+L) to the wheel odometry alone (W). The ground truth (GT) is established using the VICON motion capture system.\relax }{figure.caption.28}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {6.3}{\ignorespaces The mean-square error \relax }}{31}{figure.caption.29}}
-\newlabel{fig:mse_localization}{{6.3}{31}{The mean-square error \relax }{figure.caption.29}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {6.2}Localization}{30}{section.6.2}}
+\@writefile{lof}{\contentsline {figure}{\numberline {6.2}{\ignorespaces Localization using a fusion of wheel and LIDAR odometry (W+L) to the wheel odometry alone (W). The ground truth (GT) is established using the VICON motion capture system.\relax }}{30}{figure.caption.28}}
+\newlabel{fig:ekf_localization}{{6.2}{30}{Localization using a fusion of wheel and LIDAR odometry (W+L) to the wheel odometry alone (W). The ground truth (GT) is established using the VICON motion capture system.\relax }{figure.caption.28}{}}
+\citation{censi2007accurate}
+\@writefile{lof}{\contentsline {figure}{\numberline {6.3}{\ignorespaces The mean quared error of the position (top) and orientation (bottom) estimates. \relax }}{31}{figure.caption.29}}
+\newlabel{fig:mse_localization}{{6.3}{31}{The mean quared error of the position (top) and orientation (bottom) estimates. \relax }{figure.caption.29}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {6.3}Motion planning}{31}{section.6.3}}
 \bibdata{literatura}
 \@writefile{toc}{\contentsline {chapter}{\numberline {7}Conclusion}{32}{chapter.7}}
 \@writefile{lof}{\addvspace {10\p@ }}
 \@writefile{lot}{\addvspace {10\p@ }}
 \@writefile{loa}{\addvspace {10\p@ }}
 \bibcite{baillieul1985kinematic}{{1}{1985}{{Baillieul}}{{}}}
-\bibcite{bloch2003nonholonomic}{{2}{2003}{{Bloch et~al.}}{{Bloch, Baillieul, Crouch, Marsden, Zenkov, Krishnaprasad, and Murray}}}
-\bibcite{buss2005selectively}{{3}{2005}{{Buss and Kim}}{{}}}
-\bibcite{chan1988general}{{4}{1988}{{Chan and Lawrence}}{{}}}
-\bibcite{chiaverini1997singularity}{{5}{1997}{{Chiaverini}}{{}}}
-\bibcite{chiaverini1994review}{{6}{1994}{{Chiaverini et~al.}}{{Chiaverini, Siciliano, and Egeland}}}
-\bibcite{colome2012redundant}{{7}{2012}{{Colom{\'e} and Torras}}{{}}}
-\bibcite{colome2015closed}{{8}{2015}{{Colom{\'e} and Torras}}{{}}}
-\bibcite{jaimez2016planar}{{9}{2016}{{Jaimez et~al.}}{{Jaimez, Monroy, and Gonzalez-Jimenez}}}
-\bibcite{korayem2004analysis}{{10}{2004}{{Korayem and Ghariblu}}{{}}}
+\bibcite{besl1992method}{{2}{1992}{{Besl et~al.}}{{Besl, McKay, et~al.}}}
+\bibcite{bloch2003nonholonomic}{{3}{2003}{{Bloch et~al.}}{{Bloch, Baillieul, Crouch, Marsden, Zenkov, Krishnaprasad, and Murray}}}
+\bibcite{buss2005selectively}{{4}{2005}{{Buss and Kim}}{{}}}
+\bibcite{censi2007accurate}{{5}{2007}{{Censi}}{{}}}
+\bibcite{chan1988general}{{6}{1988}{{Chan and Lawrence}}{{}}}
+\bibcite{chiaverini1997singularity}{{7}{1997}{{Chiaverini}}{{}}}
+\bibcite{chiaverini1994review}{{8}{1994}{{Chiaverini et~al.}}{{Chiaverini, Siciliano, and Egeland}}}
+\bibcite{colome2012redundant}{{9}{2012}{{Colom{\'e} and Torras}}{{}}}
+\bibcite{colome2015closed}{{10}{2015}{{Colom{\'e} and Torras}}{{}}}
 \@writefile{toc}{\contentsline {chapter}{Bibliography}{33}{chapter*.30}}
-\bibcite{korayem2012mathematical}{{11}{2012}{{Korayem et~al.}}{{Korayem, Rahimi, and Nikoobin}}}
-\bibcite{moe2016set}{{12}{2016}{{Moe et~al.}}{{Moe, Antonelli, Teel, Pettersen, and Schrimpf}}}
-\bibcite{MooreStouchKeneralizedEkf2014}{{13}{2014}{{Moore and Stouch}}{{}}}
-\bibcite{nakamura1990advanced}{{14}{1990}{{Nakamura}}{{}}}
-\bibcite{nakamura1987task}{{15}{1987}{{Nakamura et~al.}}{{Nakamura, Hanafusa, and Yoshikawa}}}
-\bibcite{papadopoulos1999framework}{{16}{1999}{{Papadopoulos and Gonthier}}{{}}}
-\bibcite{schulman2013finding}{{17}{2013}{{Schulman et~al.}}{{Schulman, Ho, Lee, Awwal, Bradlow, and Abbeel}}}
-\bibcite{sciavicco2012modelling}{{18}{2012}{{Sciavicco and Siciliano}}{{}}}
-\bibcite{slotine1991general}{{19}{1991}{{Slotine}}{{}}}
-\bibcite{thrun2005probabilistic}{{20}{2005}{{Thrun et~al.}}{{Thrun, Burgard, and Fox}}}
-\bibcite{uicker1964iterative}{{21}{1964}{{Uicker et~al.}}{{Uicker, Denavit, and Hartenberg}}}
-\bibcite{xu2010two}{{22}{2010}{{Xu et~al.}}{{Xu, Wang, and Sun}}}
-\bibcite{yamamoto1992coordinating}{{23}{1992}{{Yamamoto and Yun}}{{}}}
+\bibcite{fujii2013extended}{{11}{2013}{{Fujii}}{{}}}
+\bibcite{jaimez2016planar}{{12}{2016}{{Jaimez et~al.}}{{Jaimez, Monroy, and Gonzalez-Jimenez}}}
+\bibcite{korayem2004analysis}{{13}{2004}{{Korayem and Ghariblu}}{{}}}
+\bibcite{korayem2012mathematical}{{14}{2012}{{Korayem et~al.}}{{Korayem, Rahimi, and Nikoobin}}}
+\bibcite{moe2016set}{{15}{2016}{{Moe et~al.}}{{Moe, Antonelli, Teel, Pettersen, and Schrimpf}}}
+\bibcite{MooreStouchKeneralizedEkf2014}{{16}{2014}{{Moore and Stouch}}{{}}}
+\bibcite{nakamura1990advanced}{{17}{1990}{{Nakamura}}{{}}}
+\bibcite{nakamura1987task}{{18}{1987}{{Nakamura et~al.}}{{Nakamura, Hanafusa, and Yoshikawa}}}
+\bibcite{papadopoulos1999framework}{{19}{1999}{{Papadopoulos and Gonthier}}{{}}}
+\bibcite{schulman2013finding}{{20}{2013}{{Schulman et~al.}}{{Schulman, Ho, Lee, Awwal, Bradlow, and Abbeel}}}
+\bibcite{sciavicco2012modelling}{{21}{2012}{{Sciavicco and Siciliano}}{{}}}
+\bibcite{slotine1991general}{{22}{1991}{{Slotine}}{{}}}
+\bibcite{thrun2005probabilistic}{{23}{2005}{{Thrun et~al.}}{{Thrun, Burgard, and Fox}}}
+\bibcite{uicker1964iterative}{{24}{1964}{{Uicker et~al.}}{{Uicker, Denavit, and Hartenberg}}}
+\bibcite{xu2010two}{{25}{2010}{{Xu et~al.}}{{Xu, Wang, and Sun}}}
+\bibcite{yamamoto1992coordinating}{{26}{1992}{{Yamamoto and Yun}}{{}}}
 \bibstyle{plainnat}
 \@writefile{toc}{\contentsline {chapter}{\numberline {A}DH parameters}{36}{appendix.A}}
 \@writefile{lof}{\addvspace {10\p@ }}

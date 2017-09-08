@@ -1,4 +1,4 @@
-\begin{thebibliography}{23}
+\begin{thebibliography}{26}
 \providecommand{\natexlab}[1]{#1}
 \providecommand{\url}[1]{\texttt{#1}}
 \expandafter\ifx\csname urlstyle\endcsname\relax
@@ -10,6 +10,12 @@ John Baillieul.
 \newblock Kinematic programming alternatives for redundant manipulators.
 \newblock In \emph{Robotics and Automation. Proceedings. 1985 IEEE
   International Conference on}, volume~2, pages 722--728. IEEE, 1985.
+
+\bibitem[Besl et~al.(1992)Besl, McKay, et~al.]{besl1992method}
+Paul~J Besl, Neil~D McKay, et~al.
+\newblock A method for registration of 3-d shapes.
+\newblock \emph{IEEE Transactions on pattern analysis and machine
+  intelligence}, 14\penalty0 (2):\penalty0 239--256, 1992.
 
 \bibitem[Bloch et~al.(2003)Bloch, Baillieul, Crouch, Marsden, Zenkov,
   Krishnaprasad, and Murray]{bloch2003nonholonomic}
@@ -23,6 +29,12 @@ Samuel~R Buss and Jin-Su Kim.
 \newblock Selectively damped least squares for inverse kinematics.
 \newblock \emph{Journal of Graphics tools}, 10\penalty0 (3):\penalty0 37--49,
   2005.
+
+\bibitem[Censi(2007)]{censi2007accurate}
+Andrea Censi.
+\newblock An accurate closed-form estimate of icp's covariance.
+\newblock In \emph{Robotics and Automation, 2007 IEEE International Conference
+  on}, pages 3167--3172. IEEE, 2007.
 
 \bibitem[Chan and Lawrence(1988)]{chan1988general}
 Stephen~K Chan and Peter~D Lawrence.
@@ -58,6 +70,11 @@ Adria Colom{\'e} and Carme Torras.
   assessment and two enhancements.
 \newblock \emph{IEEE/ASME Transactions on Mechatronics}, 20\penalty0
   (2):\penalty0 944--955, 2015.
+
+\bibitem[Fujii(2013)]{fujii2013extended}
+Keisuke Fujii.
+\newblock Extended kalman filter.
+\newblock \emph{Refernce Manual}, 2013.
 
 \bibitem[Jaimez et~al.(2016)Jaimez, Monroy, and
   Gonzalez-Jimenez]{jaimez2016planar}

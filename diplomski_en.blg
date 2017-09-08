@@ -4,45 +4,45 @@ The top-level auxiliary file: diplomski_en.aux
 The style file: plainnat.bst
 Database file #1: literatura.bib
 Warning--can't use both volume and number fields in schulman2013finding
-You've used 23 entries,
+You've used 26 entries,
             2773 wiz_defined-function locations,
-            738 strings with 9588 characters,
-and the built_in function-call counts, 11682 in all, are:
-= -- 1078
-> -- 610
-< -- 24
-+ -- 206
-- -- 183
-* -- 916
-:= -- 1716
-add.period$ -- 75
-call.type$ -- 23
-change.case$ -- 127
-chr.to.int$ -- 23
-cite$ -- 47
-duplicate$ -- 560
-empty$ -- 984
-format.name$ -- 224
-if$ -- 2517
+            754 strings with 9980 characters,
+and the built_in function-call counts, 13035 in all, are:
+= -- 1209
+> -- 659
+< -- 27
++ -- 224
+- -- 198
+* -- 1007
+:= -- 1913
+add.period$ -- 85
+call.type$ -- 26
+change.case$ -- 140
+chr.to.int$ -- 26
+cite$ -- 53
+duplicate$ -- 634
+empty$ -- 1111
+format.name$ -- 242
+if$ -- 2815
 int.to.chr$ -- 1
 int.to.str$ -- 1
-missing$ -- 26
-newline$ -- 123
-num.names$ -- 92
-pop$ -- 270
+missing$ -- 29
+newline$ -- 138
+num.names$ -- 104
+pop$ -- 299
 preamble$ -- 1
-purify$ -- 107
+purify$ -- 117
 quote$ -- 0
-skip$ -- 442
+skip$ -- 497
 stack$ -- 0
-substring$ -- 530
-swap$ -- 104
-text.length$ -- 11
+substring$ -- 601
+swap$ -- 119
+text.length$ -- 12
 text.prefix$ -- 0
 top$ -- 0
-type$ -- 238
+type$ -- 271
 warning$ -- 1
-while$ -- 111
+while$ -- 125
 width$ -- 0
-write$ -- 311
+write$ -- 350
 (There was 1 warning)
