@@ -328,15 +328,15 @@ J =
     \dfrac{\partial{f_2}}{\partial x_{1}}      & \dfrac{\partial {f}_{2}}{\partial x_{2}}  & \dots & \dfrac{\partial {f}_{2}}{\partial x_{n}} \\
     \vdots \\
     \dfrac{\partial {f_k}}{\partial x_{1}}      & \dfrac{\partial {f}_{k}}{\partial x_{2}}  & \dots & \dfrac{\partial {f}_{k}}{\partial x_{n}}
-\end{bmatrix}
+\end{bmatrix}\, .
 \end{align}
 Now $\dot{f}$ can be calculated by multiplying the matrix with $\dot{x}$
 \begin{align} \label{eq:jacobian_identity}
-\dot{f} = J \dot{x}
+\dot{f} = J \dot{x}\, .
 \end{align}
 For a sufficiently small $\Delta$, \eqref{eq:jacobian_identity} can be extended to produce a first order approximation $\hat{f}_k$ 
 \begin{align} \label{eq:jacobian_estimate}
-\hat{f}_k = f_{k-1} + J\left(x_{k} - x_{k-1}\right)
+\hat{f}_k = f_{k-1} + J\left(x_{k} - x_{k-1}\right)\, .
 \end{align}
 This framework can be employed in various state estimation and motion planning algorithms.
 \newpage
@@ -977,44 +977,82 @@ Aside from being open-source, the main advantage of this simulator is that it is
 Furthermore, the \verb|ros_control| controllers used on the actual robot are also integrated in the Gazebo simulation, expediting the implementation procedure.
 
 \section{Localization}
-\autoref{fig:ekf_localization} shows the results of base localization on  a dataset consisting of manual Ridgeback movement inputs.
+\autoref{fig:ekf_localization} shows the results of base localization on a dataset consisting of manual Ridgeback movement inputs.
 Two variants are compared: the first variant  uses an EKF to achieve fusion of both the wheel and LIDAR odometry, the second variant integrates wheel odometry alone using the EKF only to account for measurement noise.
+Ground truth was established using the VICON\footnote{https://www.vicon.com/} motion capture system, which provides sub-millimetre level accuracy.
 \begin{figure}[h]
 \centering
 \input{slike/ekf_localization_plot.tex}
 \caption{Localization using a fusion of wheel and LIDAR odometry (W+L) to the wheel odometry alone (W). The ground truth (GT) is established using the VICON motion capture system.}
 \label{fig:ekf_localization}
 \end{figure}
-Ground truth was established using the VICON\footnote{https://www.vicon.com/} motion capture system, which provides sub-millimetre level accuracy.
 
 The expected result would show that fusing two odometry sources provides a better motion estimate than using wheel odometry alone. 
 However, this might not always be the case as the LIDAR odometry algorithm from \autoref{subsection:lidar_odometry} relies heavily on the number of data points.
-Additionally, the LIDAR odometry algorithm provides a covariance matrix that is associated with the solver and not the uncertainty of the estimate itself.
-This is seen in \ref{fig:mse_localization}, where the mean squared error (MSE) of the position and angle estimates is shown.
+Additionally, the LIDAR odometry algorithm provides a covariance matrix that is associated with the coarse-to-fine scheme of the solver and not the uncertainty of the pose estimate itself.
+This is seen in \ref{fig:mse_localization}, where the mean squared error (MSE) of the base pose estimates is shown.
 The position MSE of the fused odometry is a slight improvement over the wheel odometry alone, however this depends on the orientation of the vehicle and the number of obstacles the LIDAR is facing.
 Looking at the orientation MSE, it is visible that the fused estimate actually becomes worse than the alternative, which should never happen with an EKF if proper covariances are provided.
 
 In absolute terms , both methods have an increasing MSE that is reasonably low. 
 After 120 seconds of fast erratic movement, the position MSE of $0.05$ [m]$^2$ equates to about $20$ [cm] of error.
 It is the authors opinion that this shows advantages of an holonomic omni-drive over the standard wheeled drives, as a high degree of robustness is shown both in angle and position estimates.
-A global localization source such as a GPS could periodically improve the global estimate, making this amount of odometry error tolerable.
+A global position estimate source such as a GPS could periodically improve the base position estimate, compensating for the odometry error.
 \begin{figure}[h]
 \centering
 \input{slike/mse_localization.tex}
-\caption{The mean quared error of the position (top) and orientation (bottom) estimates. }
+\caption{The mean quared error of the position (\textbf{top}) and orientation (\textbf{bottom}) estimates. }
 \label{fig:mse_localization}
 \end{figure}
 
 The conclusion drawn is that further tuning of the covariance matrix for the LDIAR odometry is necessary.
 Another option would be using an algorithm based on ICP, where a closed-form formulation for covariance is available \citep{censi2007accurate}.
 Further improvements to localization could also be obtained by using more sensors. 
-The Ridgebacks IMU sensor was not available for this work due to hardware problems, but it stands to reason that it would improve the estimate, especially since the wheel odometry + IMU pairing is well researched.
+The Ridgebacks IMU sensor was not available for this work due to hardware problems.
+It stands to reason that it would improve the estimate, especially since the wheel odometry + IMU pairing is ubiquitous in mobile robot state estimation problem 
 
-\section{Motion planning}
+\section{Dual trajectory}
+As a final test, a dataset of the mobile manipulator performing a 2 metre long trajectory was collected.
+The goal trajectory involves the Ridgeback following a sinusoidal reference while the arm draws a straight line with constant orientation.
+The choice of trajectory was made based on prospective mobile manipulator tasks such as welding or spray painting.
+\begin{figure}[h]
+\centering
+\input{slike/dual_trajectory.tex}
+\caption{The positions of mobile manipulator frames during trajectory execution, comparison of ground truth and estimate.
+The lower right corner shows the Ridgeback trajectory, while the other three plots shows the end-effector trajectory from different viewpoints.}
+\label{fig:dual_trajectory}
+\end{figure}
+
+From \ref{fig:dual_trajectory} it can be concluded that the end-effector and base estimate deviation from the ground truth is heavily correlated.
+Moreover, both frames significantly deviate in the x-y (ground) plane.
+The estimation error in the bottom left and top right plots showing the y-z and x-z planes is negligible.
+From this, the assumption made in \ref{chapter:State estimation} is confirmed.
+More precisely, this means that the majority of the end-effector state estimation error stems from localization.
+
+The trajectory joint solution is driven to an arbitrary error using the motion planning scheme.
+Errors still emerge from the fact that the control is purely kinematic and thus ignores dynamic effects.
+For this reason the scheme presented in this work is vulnerable to non-controlled environments.
 
 
 \chapter{Conclusion}
-Conclusion.
+In this thesis an analysis of a full motion planning and state estimation solution for a mobile manipulator was presented.
+It has been found that the majority of state estimation errors stem from base localization.
+The state estimation solution utilizes the wheel and laser range finder odometry fused using an extended Kalman filter to provide a reasonable base pose estimate. 
+
+Two motion planing methods which solve for a base and end-effector trajectory are successfully implemented.
+A classical task priority approach is used as a tried-and-true approach while sequential convex optimization is presented as a more contemporary approach which enables advanced trajectory optimization.
+Trajectory optimization methods have been explored which leverage the omni-directional nature of the base, opening up the possibility of various kinematic and active perception solutions.
+
+A software architecture is developed for interfacing with user defined Cartesian trajectories.
+An approach is taken which defines an robust and highly tested core for interfacing with the local controllers, taking motion planning solutions as modules which can in turn be developed separately.
+Individual software components are ran in ROS scheme, enabling networked interfacing which is in itself highly tested and modular.
+
+The results show successful performance of long Cartesian trajectories, subject to a decrease of position estimate accuracy with time.
+A manipulability optimization scheme is tested in simulation, showing promising results.
+Future work can be done on several different aspects.
+The motion planning scheme could be modified in an intelligent manner using AI methods, changing trajectory optimization criteria depending on the environment.
+Other avenues would include improving the state estimates using SLAM or more odometry sources, utilizing the gripper for tasks, or performing sensor calibration autonomously.
+
 
 \bibliography{literatura}
 \bibliographystyle{plainnat}

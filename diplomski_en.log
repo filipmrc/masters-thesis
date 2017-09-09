@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013/Debian) (format=pdflatex 2017.8.25)  8 SEP 2017 12:23
+This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013/Debian) (format=pdflatex 2017.8.25)  9 SEP 2017 01:39
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1541,37 +1541,37 @@ Package pdftex.def Info: ./slike/gazebo_screenshot1.png used on input line 966.
 [29
 
  <./slike/lidar_test1.jpg> <./slike/gazebo_screenshot1.png>] [30]
-(./slike/mse_localization.tex) [31]
+(./slike/mse_localization.tex) (./slike/dual_trajectory.tex) [31] [32]
 Chapter 7.
-(./diplomski_en.bbl [32
+(./diplomski_en.bbl [33
 
-] [33
+] [34
 
-] [34]) [35]
+] [35]) [36]
 Chapter A.
-[36
+[37
 
-] [37]
+] [38]
 Chapter B.
-[38
+[39
 
 ]
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 1077.
- [39]
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 1077.
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 1115.
+ [40]
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 1115.
  (./diplomski_en.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 1077.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 1077.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 1115.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 1115.
 
 Package rerunfilecheck Info: File `diplomski_en.out' has not changed.
-(rerunfilecheck)             Checksum: 8F110D3779CA1765828BDF02FC8AE4B1;2823.
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 1077.
+(rerunfilecheck)             Checksum: 1B8FAA3086B7603AB226C889638DABF6;2823.
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 1115.
  ) 
 Here is how much of TeX's memory you used:
- 30446 strings out of 493304
- 1076714 string characters out of 6139871
- 2058169 words of memory out of 5000000
- 32978 multiletter control sequences out of 15000+600000
+ 30493 strings out of 493304
+ 1386195 string characters out of 6139871
+ 2079493 words of memory out of 5000000
+ 33020 multiletter control sequences out of 15000+600000
  79109 words of font info for 100 fonts, out of 8000000 for 9000
  957 hyphenation exceptions out of 8191
  76i,23n,87p,68262b,2072s stack positions out of 5000i,500n,10000p,200000b,80000s
@@ -1595,10 +1595,10 @@ vr8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/times/utmb8a.pfb></usr/
 share/texlive/texmf-dist/fonts/type1/urw/times/utmr8a.pfb></usr/share/texlive/t
 exmf-dist/fonts/type1/urw/times/utmr8a.pfb></usr/share/texlive/texmf-dist/fonts
 /type1/urw/times/utmri8a.pfb>
-Output written on diplomski_en.pdf (44 pages, 20188947 bytes).
+Output written on diplomski_en.pdf (45 pages, 20255061 bytes).
 PDF statistics:
- 916 PDF objects out of 1000 (max. 8388607)
- 814 compressed objects within 9 object streams
- 265 named destinations out of 1000 (max. 500000)
+ 923 PDF objects out of 1000 (max. 8388607)
+ 820 compressed objects within 9 object streams
+ 267 named destinations out of 1000 (max. 500000)
  452 words of extra memory for PDF output out of 10000 (max. 10000000)
 

@@ -48,8 +48,8 @@
 \contentsline {chapter}{\numberline {6}Experimental results}{29}{chapter.6}
 \contentsline {section}{\numberline {6.1}Simulation}{29}{section.6.1}
 \contentsline {section}{\numberline {6.2}Localization}{30}{section.6.2}
-\contentsline {section}{\numberline {6.3}Motion planning}{31}{section.6.3}
-\contentsline {chapter}{\numberline {7}Conclusion}{32}{chapter.7}
-\contentsline {chapter}{Bibliography}{33}{chapter*.30}
-\contentsline {chapter}{\numberline {A}DH parameters}{36}{appendix.A}
-\contentsline {chapter}{\numberline {B}Robot operating system}{38}{appendix.B}
+\contentsline {section}{\numberline {6.3}Dual trajectory}{32}{section.6.3}
+\contentsline {chapter}{\numberline {7}Conclusion}{33}{chapter.7}
+\contentsline {chapter}{Bibliography}{34}{chapter*.31}
+\contentsline {chapter}{\numberline {A}DH parameters}{37}{appendix.A}
+\contentsline {chapter}{\numberline {B}Robot operating system}{39}{appendix.B}
