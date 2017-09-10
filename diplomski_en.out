@@ -2,43 +2,43 @@
 \BOOKMARK [0][-]{chapter.2}{Thing mobile manipulator}{}% 2
 \BOOKMARK [1][-]{section.2.1}{Ridgeback}{chapter.2}% 3
 \BOOKMARK [1][-]{section.2.2}{UR10}{chapter.2}% 4
-\BOOKMARK [1][-]{section.2.3}{Hokuyo LIDAR}{chapter.2}% 5
-\BOOKMARK [1][-]{section.2.4}{FT300}{chapter.2}% 6
-\BOOKMARK [1][-]{section.2.5}{Robotiq Gripper}{chapter.2}% 7
-\BOOKMARK [0][-]{chapter.3}{State estimation}{}% 8
-\BOOKMARK [1][-]{section.3.1}{State}{chapter.3}% 9
-\BOOKMARK [1][-]{section.3.2}{Kinematic model}{chapter.3}% 10
-\BOOKMARK [2][-]{subsection.3.2.1}{Forward kinematics}{section.3.2}% 11
-\BOOKMARK [2][-]{subsection.3.2.2}{Differential forward kinematics}{section.3.2}% 12
-\BOOKMARK [1][-]{section.3.3}{Localization}{chapter.3}% 13
-\BOOKMARK [2][-]{subsection.3.3.1}{Wheel odometry}{section.3.3}% 14
-\BOOKMARK [2][-]{subsection.3.3.2}{LIDAR odometry}{section.3.3}% 15
-\BOOKMARK [2][-]{subsection.3.3.3}{Extended Kalman filter}{section.3.3}% 16
-\BOOKMARK [0][-]{chapter.4}{Motion planning}{}% 17
-\BOOKMARK [1][-]{section.4.1}{Inverse kinematics}{chapter.4}% 18
-\BOOKMARK [2][-]{subsection.4.1.1}{Differential inverse kinematics}{section.4.1}% 19
-\BOOKMARK [2][-]{subsection.4.1.2}{The Jacobian pseudoinverse and numerical filtering}{section.4.1}% 20
-\BOOKMARK [1][-]{section.4.2}{Redundancy resolution}{chapter.4}% 21
-\BOOKMARK [1][-]{section.4.3}{Task-prioity kinematics}{chapter.4}% 22
-\BOOKMARK [2][-]{subsection.4.3.1}{Motion planning scheme}{section.4.3}% 23
-\BOOKMARK [2][-]{subsection.4.3.2}{Drawbacks}{section.4.3}% 24
-\BOOKMARK [1][-]{section.4.4}{Sequential convex optimization}{chapter.4}% 25
-\BOOKMARK [2][-]{subsection.4.4.1}{Modeling objective and constraint functions}{section.4.4}% 26
-\BOOKMARK [2][-]{subsection.4.4.2}{Motion planning scheme}{section.4.4}% 27
-\BOOKMARK [2][-]{subsection.4.4.3}{The SQP algorithm}{section.4.4}% 28
-\BOOKMARK [0][-]{chapter.5}{Software architecture}{}% 29
-\BOOKMARK [1][-]{section.5.1}{Overview}{chapter.5}% 30
-\BOOKMARK [2][-]{subsection.5.1.1}{Architecture}{section.5.1}% 31
-\BOOKMARK [1][-]{section.5.2}{State estimation}{chapter.5}% 32
-\BOOKMARK [1][-]{section.5.3}{Motion planning}{chapter.5}% 33
-\BOOKMARK [2][-]{subsection.5.3.1}{Task-priority}{section.5.3}% 34
-\BOOKMARK [2][-]{subsection.5.3.2}{Sequential convex optimization}{section.5.3}% 35
-\BOOKMARK [1][-]{section.5.4}{Control}{chapter.5}% 36
-\BOOKMARK [0][-]{chapter.6}{Experimental results}{}% 37
-\BOOKMARK [1][-]{section.6.1}{Simulation}{chapter.6}% 38
-\BOOKMARK [1][-]{section.6.2}{Localization}{chapter.6}% 39
-\BOOKMARK [1][-]{section.6.3}{Dual trajectory}{chapter.6}% 40
-\BOOKMARK [0][-]{chapter.7}{Conclusion}{}% 41
-\BOOKMARK [0][-]{chapter*.31}{Bibliography}{}% 42
-\BOOKMARK [0][-]{appendix.A}{DH parameters}{}% 43
+\BOOKMARK [0][-]{chapter.3}{State estimation}{}% 5
+\BOOKMARK [1][-]{section.3.1}{State}{chapter.3}% 6
+\BOOKMARK [1][-]{section.3.2}{Kinematic model}{chapter.3}% 7
+\BOOKMARK [2][-]{subsection.3.2.1}{Forward kinematics}{section.3.2}% 8
+\BOOKMARK [2][-]{subsection.3.2.2}{Differential forward kinematics}{section.3.2}% 9
+\BOOKMARK [1][-]{section.3.3}{Localization}{chapter.3}% 10
+\BOOKMARK [2][-]{subsection.3.3.1}{Wheel odometry}{section.3.3}% 11
+\BOOKMARK [2][-]{subsection.3.3.2}{LIDAR odometry}{section.3.3}% 12
+\BOOKMARK [2][-]{subsection.3.3.3}{Extended Kalman filter}{section.3.3}% 13
+\BOOKMARK [0][-]{chapter.4}{Motion planning}{}% 14
+\BOOKMARK [1][-]{section.4.1}{Inverse kinematics}{chapter.4}% 15
+\BOOKMARK [2][-]{subsection.4.1.1}{Differential inverse kinematics}{section.4.1}% 16
+\BOOKMARK [2][-]{subsection.4.1.2}{The Jacobian pseudoinverse and numerical filtering}{section.4.1}% 17
+\BOOKMARK [1][-]{section.4.2}{Redundancy resolution}{chapter.4}% 18
+\BOOKMARK [1][-]{section.4.3}{Task-prioity kinematics}{chapter.4}% 19
+\BOOKMARK [2][-]{subsection.4.3.1}{Motion planning scheme}{section.4.3}% 20
+\BOOKMARK [2][-]{subsection.4.3.2}{Drawbacks}{section.4.3}% 21
+\BOOKMARK [1][-]{section.4.4}{Sequential convex optimization}{chapter.4}% 22
+\BOOKMARK [2][-]{subsection.4.4.1}{Modeling objective and constraint functions}{section.4.4}% 23
+\BOOKMARK [2][-]{subsection.4.4.2}{Motion planning scheme}{section.4.4}% 24
+\BOOKMARK [2][-]{subsection.4.4.3}{The SQP algorithm}{section.4.4}% 25
+\BOOKMARK [0][-]{chapter.5}{Software architecture}{}% 26
+\BOOKMARK [1][-]{section.5.1}{Overview}{chapter.5}% 27
+\BOOKMARK [2][-]{subsection.5.1.1}{Architecture}{section.5.1}% 28
+\BOOKMARK [1][-]{section.5.2}{State estimation}{chapter.5}% 29
+\BOOKMARK [1][-]{section.5.3}{Motion planning}{chapter.5}% 30
+\BOOKMARK [2][-]{subsection.5.3.1}{Task-priority}{section.5.3}% 31
+\BOOKMARK [2][-]{subsection.5.3.2}{Sequential convex optimization}{section.5.3}% 32
+\BOOKMARK [1][-]{section.5.4}{Control}{chapter.5}% 33
+\BOOKMARK [0][-]{chapter.6}{Experimental results}{}% 34
+\BOOKMARK [1][-]{section.6.1}{Localization}{chapter.6}% 35
+\BOOKMARK [1][-]{section.6.2}{Dual trajectory}{chapter.6}% 36
+\BOOKMARK [1][-]{section.6.3}{Trajectory optimization}{chapter.6}% 37
+\BOOKMARK [0][-]{chapter.7}{Conclusion}{}% 38
+\BOOKMARK [0][-]{chapter*.29}{Bibliography}{}% 39
+\BOOKMARK [0][-]{appendix.A}{Other equipment}{}% 40
+\BOOKMARK [1][-]{section.A.1}{Hokuyo LIDAR}{appendix.A}% 41
+\BOOKMARK [1][-]{section.A.2}{FT300}{appendix.A}% 42
+\BOOKMARK [1][-]{section.A.3}{Robotiq Gripper}{appendix.A}% 43
 \BOOKMARK [0][-]{appendix.B}{Robot operating system}{}% 44
