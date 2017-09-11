@@ -26,9 +26,10 @@ axis background/.style={fill=white},
 axis x line*=bottom,
 axis y line*=left,
 xmajorgrids,
-ymajorgrids
+ymajorgrids,
+legend style={at={(0.0,0.678)}, anchor=south west, legend cell align=left, align=left, draw=white!15!black}
 ]
-\addplot [color=mycolor1, forget plot,line width=0.6pt]
+\addplot [color=mycolor1, line width=0.6pt]
   table[row sep=crcr]{%
 0.220768640487996	1.0437672288149\\
 0.220683009433632	1.04375560025204\\
@@ -915,7 +916,8 @@ ymajorgrids
 1.78570051187632	2.25756090802235\\
 1.78568862934586	2.25753567828597\\
 };
-\addplot [color=mycolor2, forget plot,line width=0.6pt]
+\addlegendentry{Estimate}
+\addplot [color=mycolor2, line width=0.6pt]
   table[row sep=crcr]{%
 0.219917197162753	1.04391646398838\\
 0.220972618066205	1.04298952262024\\
@@ -2088,6 +2090,7 @@ ymajorgrids
 1.7579660853274	2.30274487753774\\
 1.7579395639452	2.30279208332144\\
 };
+\addlegendentry{GT}
 \end{axis}
 
 \begin{axis}[%

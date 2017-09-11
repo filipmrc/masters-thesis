@@ -27,7 +27,7 @@
 \title{From Global to Local: Maintaining Accurate Mobile Manipulator State Estimates Over Long Trajectories}
 
 % TODO: Navedite svoje ime i prezime.
-\author{Filip Maric}
+\author{Filip Marić}
 
 \maketitle
 
@@ -41,8 +41,8 @@
 
 \chapter{Introduction}
 In applications ranging from military operations to extraterrestrial exploration, mobile manipulators present themselves as the ideal answer to many challenges being addressed by robots.
-The mobile platform increases the workspace of a conventional manipulator while also enabling optimal positioning.
-The increased workspace provides the capability of performing industrial tasks that would otherwise require multiple manipulators.
+The mobile platform increases the workspace of a conventional manipulator.
+The increased workspace provides the capability of performing tasks that would otherwise require multiple manipulators.
 A comprehensive survey on mobile manipulator systems can be found in \citep{bloch2003nonholonomic}.
 
 The mobile manipulator can be described as a robotic system composed of a manipulator arm mounted on top of a mobile platform.
@@ -51,10 +51,10 @@ These include dynamic and static stability, force development and application, m
 However, a majority of the research concerning mobile manipulators deals with motion planning and state estimation \citep{yamamoto1992coordinating,korayem2012mathematical}.
  
 This thesis explores the problems of state estimation and motion planning in the context of an omni-directional mobile manipulator.
-Chapter \Cref{chapter:thing} introduces the "Thing" mobile manipulator used in the work related to this thesis.
+\Cref{chapter:thing} introduces the "Thing" mobile manipulator used in this thesis.
 Each major component is described in appropriate detail, keeping in mind the context of research presented.
 
-Chapter \Cref{chapter:State estimation} deals with the challenge of state estimation for a mobile manipulator.
+\Cref{chapter:State estimation} deals with the challenge of state estimation for a mobile manipulator.
 Assuming accurate mobile base pose data, it is possible to estimate the state of the manipulator to a reasonable degree of accuracy using only a forward kinematics model described in \Cref{section:Kinematics}.
 The primary interest thus lies in obtaining the end effector pose estimate, as other estimates can be derived from it if necessary.
 The probabilistic framework used for finding the base pose relative to the starting pose is explored in section \Cref{section:Localization}.
@@ -178,6 +178,8 @@ The provided drivers enable performing collaborative tasks alongside human opera
 The data in table \Cref{tab:ur10 specs} clearly shows that the UR10 manipulator is meant for tasks involving high precision and light payloads. 
 The repeatability value of $0.01$ mm shows that the UR10 can reach the same pose multiple times with a high degree of accuracy, which is important in industrial applications.
 Additionally, it's light weight and high end-effector modularity make it ideal for research purposes.
+
+Additional descriptions of components can be found in \Cref{appA}.
 
 \chapter{State estimation}\label{chapter:State estimation}
 State estimation is an often encountered challenge when working with autonomous systems.
@@ -408,6 +410,14 @@ f(x_1,\ x_2,\ x_3,\ \ldots,\ x_N,\ t)=0
 \end{align} 
 i.e. a holonomic constraint depends only on the coordinates $x_j$ and time $t$. It does not depend on the velocities or any higher order derivative with respect to time $t$.
 Decoupled translational and angular velocities make the estimation process less prone to error, as angular velocities are usually much more difficult to estimate.
+Odometry methods for a ground-based mobile base estimate the twist vector
+\begin{equation}
+\hat{\xi} 
+ = 
+\begin{bmatrix}
+\hat{\dot{x}}& \hat{\dot{y}}& \hat{\dot{\theta}}
+\end{bmatrix}^T\, .
+\end{equation}
 Having wheel encoder velocity readings $w_0,w_1,w_2,w_3$, a base twist estimate $\hat{\xi}$ can be calculated
 \begin{align}
 %\begin{bmatrix}
@@ -491,7 +501,7 @@ P_k^- = J_f\left(\hat{x}_{k-1}^+\right)P_{k-1}^+J_f^T\left(\hat{x}_{k-1}^+\right
 The correction step makes use of local sensor odometry to calculate the \textit{Kalman gain} $K_k$ and produce \textit{a posteriori} estimates $\hat{x}_k^+$ and $P_k^+$ 
 \begin{subequations}\label{eq:nl_correction}
 \begin{gather}
-\hat{x}_k^+ \approx \hat{x}_k^- + K_k\left(z_k - h\left(\hat{x}_k^-\right)\right) \\
+\hat{x}_k^+ = \hat{x}_k^- + K_k\left(z_k - h\left(\hat{x}_k^-\right)\right) \\
 P_k^+ = \left(I - K_kJ_h\left(\hat{x}_k^-\right)\right)P_k^- \\
 K_k = P_k^-J_h^T\left(\hat{x}_k^-\right)\left(J_h\left(\hat{x}_k^-\right)P_k^-J_h^T\left(\hat{x}_k^-\right) + R_k\right)^{-1} 
 \end{gather}
@@ -846,7 +856,7 @@ The testing procedure on the real robot suffers from a high set-up cost, which c
 Having a simulation that reasonably models the robots behaviour also expedites testing, as some concepts remain largely unaffected by dynamic effects occurring in reality.
 Furthermore, platform-agnostic code is maintained, meaning that the software does not differentiate between the simulated and real systems, drastically reducing implementation time.
 \subsection{Architecture}
-The network-based nature of ROS systems allows a distributed software architecture.
+The network-based nature of ROS systems allows a distributed software architecture (detailed description in \Cref{sec:def_ROS}).
 This enables keeping real-time dependent functionalities on the robot while running high level algorithms on a separate machine.
 Specifically, the control algorithms implemented in the \verb|ros_control| interface with the local UR10 and Ridgeback drivers and are ran on the robot's local machine which acts as a server.
 Task-specific programs are ran on a separate client machine which connects to the Thing's ROS core via WiFi or ethernet.
@@ -998,10 +1008,11 @@ Further improvements to localization could also be obtained by using more sensor
 The Ridgebacks IMU sensor was not available for this work due to hardware problems.
 It stands to reason that it would improve the estimate, especially since the wheel odometry + IMU pairing is ubiquitous in mobile robot state estimation problem 
 
-\section{Dual trajectory}
-As a final test, a dataset of the mobile manipulator performing a 2 metre long trajectory was collected.
+\section{Dual trajectory}\label{section:dual trajectory}
+To test the control and motion planning, the mobile manipulator performed a 2 metre long trajectory in the laboratory.
 The goal trajectory involves the Ridgeback following a sinusoidal reference while the arm draws a straight line with constant orientation.
 The choice of trajectory was made based on prospective mobile manipulator tasks such as welding or spray painting.
+This task involves a fully defined trajectory which leaves no room for optimization, therefore the task priority motion planner from \ref{section:task priority} is used.
 \begin{figure}[h]
 \centering
 \input{slike/dual_trajectory.tex}
@@ -1017,24 +1028,41 @@ From this, the assumption made in \Cref{chapter:State estimation} is confirmed.
 More precisely, this means that the majority of the end-effector state estimation error stems from localization.
 
 The trajectory joint solution is driven to an arbitrary error using the motion planning scheme.
-Errors still emerge from the fact that the control is purely kinematic and thus ignores dynamic effects.
-For this reason the scheme presented in this work is vulnerable to non-controlled environments.
+Errors still emerge from the fact that the control is purely kinematic and thus ignores dynamic effects, thus the scheme is vulnerable to non-controlled environments.
 
 \section{Trajectory optimization}
+Trajectory optimization defined with the motion planning scheme in \Cref{section:sqp} is tested in this section.
+The chosen performance metric is the manipulability measure defined in \eqref{mnptik_1}, a configuration resulting in a higher value is deemed better.
+Testing is done in simulation as the optimization is purely kinematic and testing on the real robot will not produce significantly differing results.
+\begin{figure}[h]
+\centering
+\input{slike/dual_trajectory_opti.tex}
+\caption{Comparison of optimized trajectory to non-optimized.
+The lower left corner shows the Ridgeback orientation $\theta$, while the lower right shows the position. End-effector position is in the upper left corner, while manipulability is in the upper right.}
+\label{fig:dual_trajectory_opti}
+\end{figure}
+
+The tested trajectory is the same as in \Cref{section:dual trajectory}, sinusoidal base movement with a linear end-effector trajectory.
+As defined in \ref{section:sqp}, we add constraints to the motion planning scheme for solving this trajectory.
+Keeping the base in the $\pm$1 cm range of any goal position and $\pm$0.1 rad away from a goal orientation, manipulability optimization is performed.
+
+In \Cref{fig:dual_trajectory_opti} (top right) a consistent manipulability increase is visible for the optimized solution, keeping the configuration values within constraints up to a tolerance of approximately 10 $\%$.
+Some extra oscillations can be seen in the end effector trajectory, but these are the result of imperfect simulated controller parametrization rather than the algorithm itself.
+
 \chapter{Conclusion}
 In this thesis an analysis of a full motion planning and state estimation solution for a mobile manipulator was presented.
 It has been found that the majority of state estimation errors stem from base localization.
 The state estimation solution utilizes the wheel and laser range finder odometry fused using an extended Kalman filter to provide a reasonable base pose estimate. 
 
 Two motion planing methods which solve for a base and end-effector trajectory are successfully implemented.
-A classical task priority approach is used as a tried-and-true approach while sequential convex optimization is presented as a more contemporary approach which enables advanced trajectory optimization.
+A classical task priority approach is used as a tried-and-true approach, while sequential convex optimization is presented as a contemporary approach which enables advanced trajectory optimization.
 Trajectory optimization methods have been explored which leverage the omni-directional nature of the base, opening up the possibility of various kinematic and active perception solutions.
 
 A software architecture is developed for interfacing with user defined Cartesian trajectories.
 An approach is taken which defines an robust and highly tested core for interfacing with the local controllers, taking motion planning solutions as modules which can in turn be developed separately.
 Individual software components are ran in ROS scheme, enabling networked interfacing which is in itself highly tested and modular.
 
-The results show successful performance of long Cartesian trajectories, subject to a decrease of position estimate accuracy with time.
+The results show satisfactory performance of long Cartesian trajectories, subject to a decrease of position estimate accuracy with time.
 A manipulability optimization scheme is tested in simulation, showing promising results.
 Future work can be done on several different aspects.
 The motion planning scheme could be modified in an intelligent manner using AI methods, changing trajectory optimization criteria depending on the environment.
@@ -1045,31 +1073,10 @@ Other avenues would include improving the state estimates using SLAM or more odo
 \bibliographystyle{plainnat}
 
 \appendix
-\chapter{Other equipment}
-\begin{table}
-\caption{Thing's DH parameters}
- \begin{tabular}{@{}ccccc@{}}
-  \toprule
- \textbf{Link}& $d_i$& $\theta_i$& $a_i$ & $\alpha_i$\\ \midrule \midrule
- \textbf{1} & $0$ & $\frac{\pi}{2}$ & $0$& $\frac{\pi}{2}$\\ \midrule
- \textbf{2} & $q_x$ & $\frac{\pi}{2}$ & $0$& $\frac{\pi}{2}$\\ \midrule
- \textbf{3} & $q_y$ & $\frac{\pi}{2}$ & $0$& $\frac{\pi}{2}$\\ \midrule
- \textbf{4} & $0$ &$q_{\theta}$ & 0& 0\\ \midrule
- \textbf{5} & $0.653$ & $0$ & 0.27& 0\\ \midrule
- \textbf{6} & $0$ & $\frac{\pi}{2}$ & 0.01& 0\\ \midrule
- \textbf{7} & $0.1273$ & $q_0$ & 0& $\frac{\pi}{2}$\\ \midrule
- \textbf{8} & $0$ & $q_1$ & -0.612& 0\\ \midrule
- \textbf{9} & $0$ & $q_2$ & -0.5723& 0\\ \midrule
- \textbf{10} & $ 0.163941$ & $q_3$ & 0& $\frac{\pi}{2}$\\ \midrule
- \textbf{11} & $0.1157$ & $q_4$ & 0& $-\frac{\pi}{2}$\\ \midrule
- \textbf{12} & $0.0922$ & $q_5$ & 0& 0\\ \bottomrule
- \end{tabular}
-\label{DH}
-\end{table}
+\chapter{Components}\label{appA}
+
 
 \section{Hokuyo LIDAR}
-The Hokuyo UST-10LX Scanning Laser Rangefinder is a small, accurate, high-speed device for obstacle detection and localization of autonomous robots and automated material handling systems. 
-This model uses Ethernet interface for communication and can obtain measurement data in a wide field of view up to a distance of 10 meters with millimeter resolution.
 \begin{figure*}[h!]
     \centering
         \begin{subfigure}[t]{0.2\textwidth}
@@ -1077,8 +1084,10 @@ This model uses Ethernet interface for communication and can obtain measurement 
     \end{subfigure}
     \caption{The Hokuyo UST-10LX LIDAR}\label{fig:ur10}
 \end{figure*}
+The Hokuyo UST-10LX Scanning Laser Rangefinder is a small, accurate, high-speed device for obstacle detection and localization of autonomous robots and automated material handling systems. 
+This model uses Ethernet interface for communication and can obtain measurement data in a wide field of view up to a distance of 10 meters with millimeter resolution.
 This sensor uses a laser source to scan 270$^\circ$ field of view. Positions of objects in the range are calculated with step angle and distance. Sensor outputs these data through communication channel.
-
+\newpage
 \section{FT300}
 \begin{figure*}[h!]
     \centering
@@ -1102,7 +1111,7 @@ It's application range from impedance control to perception and contact calibrat
 
 
 \section{Robotiq Gripper}
-\begin{figure}[h]
+\begin{figure}[H]
 \centering
 \includegraphics[width=0.3\textwidth]{robotiq}
 \caption{The Robotiq gripper}
@@ -1110,6 +1119,28 @@ It's application range from impedance control to perception and contact calibrat
 The Robotiq gripper is a three-fingered adaptive gripper used as the end effector on the UR10 manipulator.
 It is created for applications in advanced manufacturing and robotics research. 
 All the fingers can be independently position,velocity and force controlled and can exert forces from 50 to 60 $N$ at the finger tips.
+
+\chapter{DH parameters}
+\begin{table}[h]
+\caption{Thing's DH parameters}
+ \begin{tabular}{@{}ccccc@{}}
+  \toprule
+ \textbf{Link}& $d_i$& $\theta_i$& $a_i$ & $\alpha_i$\\ \midrule \midrule
+ \textbf{1} & $0$ & $\frac{\pi}{2}$ & $0$& $\frac{\pi}{2}$\\ \midrule
+ \textbf{2} & $q_x$ & $\frac{\pi}{2}$ & $0$& $\frac{\pi}{2}$\\ \midrule
+ \textbf{3} & $q_y$ & $\frac{\pi}{2}$ & $0$& $\frac{\pi}{2}$\\ \midrule
+ \textbf{4} & $0$ &$q_{\theta}$ & 0& 0\\ \midrule
+ \textbf{5} & $0.653$ & $0$ & 0.27& 0\\ \midrule
+ \textbf{6} & $0$ & $\frac{\pi}{2}$ & 0.01& 0\\ \midrule
+ \textbf{7} & $0.1273$ & $q_0$ & 0& $\frac{\pi}{2}$\\ \midrule
+ \textbf{8} & $0$ & $q_1$ & -0.612& 0\\ \midrule
+ \textbf{9} & $0$ & $q_2$ & -0.5723& 0\\ \midrule
+ \textbf{10} & $ 0.163941$ & $q_3$ & 0& $\frac{\pi}{2}$\\ \midrule
+ \textbf{11} & $0.1157$ & $q_4$ & 0& $-\frac{\pi}{2}$\\ \midrule
+ \textbf{12} & $0.0922$ & $q_5$ & 0& 0\\ \bottomrule
+ \end{tabular}
+\label{DH}
+\end{table}
 
 \chapter{Robot operating system}\label{sec:def_ROS}
 ROS is an open source software development tool for implementing robotics software. It provides the opportunity of hardware abstraction, low level device control, implementation of commonly used functionalities, messages between different processes and package management. It provide tools and libraries which utilize the the opportunity of communicating between disturbed computers, obtaining, writing and running code.
@@ -1130,17 +1161,27 @@ ROS has a huge community which contain distribution of software installations, r
 This community makes the process of learning the system considerably easier.
 \end{itemize}
 \begin{abstract}
-Abstract.
+In this thesis the problem of performing a long trajectory while maintaining an accurate state estimate is explored in the case of a mobile manipulator.
+The mobile manipulator used consists of a 6 degree-of-freedom manipulator and a omni-directional platform.
+State estimation is performed using a probabilistic framework, fusing multiple velocity and position estimates.
+Two approaches are explored for motion planning, the classical task priority approach and the more contemporary sequential convex optimization.
+Software implementation details are presented and tests are performed on both the simulation and real robot.
+The results show satisfactory trajectory following performance using local state estimates and motion planning.
 
-\keywords{Keywords.}
+\keywords{Mobile manipulator, motion planning, state estimation, trajectory, arm, ROS}
 \end{abstract}
 
 % TODO: Navedite naslov na hrvatskom jeziku.
 \hrtitle{Naslov}
 \begin{sazetak}
-Sažetak na hrvatskom jeziku.
+U ovom diplomskom radu proučava se problem estimacije stanja i praćenja trajektorije u slučaju mobilnog manipulatora.
+Korišteni mobilni manipulator sastoji se od manipulatora sa šest stupnjeva slobode i svesmjerne mobilne platforme.
+Estimacija stanja vrši se ujedinjujući više različitih izvora estimacija brzina i pozicija.
+Proučeni su klasičan i suvremen pristup planiranju kretanja i njihovi rezultati su prikazani.
+Programska implementacija je objašnjena i eksperimenti su izvršeni u simulaciji i na stvarnom robotu.
+Rezultati pokazuju uspješno izvršavanje trajektorija koristeći prikazane metode planiranja kretanja i estimacije stanja.
 
-\kljucnerijeci{Ključne riječi, odvojene zarezima.}
+\kljucnerijeci{Mobilni manipulator, planiranje kretanja, estimacija stanja, trajektorija, robotska ruka, ROS.}
 \end{sazetak}
 
 \end{document}
